@@ -150,16 +150,23 @@ function playWord() {
 
 function aiTurn() {
   const lastChar = currentWord.slice(-1).toLowerCase();
-  const possible = wordList.filter(
+  let possible = wordList.filter(
     w => w[0].toLowerCase() === lastChar && !usedWords.includes(w)
   );
 
   if (possible.length === 0) {
-    document.getElementById("message").textContent =
-      "🎉";
+    // Wenn AI kein Wort findet, wähle einfach ein zufälliges unbenutztes Wort
+    const remaining = wordList.filter(w => !usedWords.includes(w));
+    if (remaining.length > 0) {
+      const randomWord = remaining[Math.floor(Math.random() * remaining.length)];
+      usedWords.push(randomWord);
+      currentWord = randomWord;
+      document.getElementById("wordDisplay").textContent = `AI says: ${currentWord}`;
+    }
     return;
   }
 
+  // AI wählt das beste Wort basierend auf möglichen nächsten Zügen
   let best = possible[0];
   let max = -1;
 
