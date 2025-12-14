@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wort-Ketten-Spiel Player vs AI</title>
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: white;
+  padding-top: 20px;
+}
+
+#gameContainer { text-align: center; width: 400px; }
+
+#wordBoard {
+  background: #111;
+  padding: 10px;
+  border-radius: 8px;
+  min-height: 200px;
+  margin-bottom: 15px;
+  overflow-y: auto;
+}
+
+.wordItem { margin: 5px 0; font-size: 18px; }
+
+#timer { font-size: 22px; margin-bottom: 10px; }
+
+/* TIMER COLORS */
+.timer-green { color: #4caf50; }
+.timer-yellow { color: #ffeb3b; }
+.timer-red { color: #f44336; animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+input[type=text] { width: 200px; padding: 8px; font-size: 16px; border-radius: 5px; border: none; }
+button { padding: 8px 16px; font-size: 16px; margin-left: 5px; border-radius: 5px; cursor: pointer; }
+
+#message { margin-top: 10px; font-size: 18px; min-height: 24px; }
+#score { margin-top: 10px; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <h1>Wort-Ketten-Spiel 🌈</h1>
+  <div id="wordBoard"></div>
+  <div id="timer">⏳ Time left: 6</div>
+  <input type="text" id="playerInput" placeholder="Dein Wort">
+  <button onclick="playerTurn()">OK</button>
+  <div id="message"></div>
+  <div id="score">Player: 0 | AI: 0</div>
+  <button onclick="resetGame()">Neustart</button>
+</div>
+
+<script>
+let wordsUsed = [];
+let playerScore = 0;
+let aiScore = 0;
+let timer = 6;
+let timerInterval = null;
+const wordBoard = document.getElementById('wordBoard');
+const timerDiv = document.getElementById('timer');
+const messageDiv = document.getElementById('message');
+const scoreDiv = document.getElementById('score');
+const playerInput = document.getElementById('playerInput');
+
+const aiWords = [
+  "Apfel", "Lampe", "Eule", "Elefant", "Tiger", "Regen", "Nase", "Ente", "Erde", "Eis",
+  "Sonne", "Enzian", "Nacht", "Tisch", "Hut", "Tanne", "Esel", "Löwe", "Erdbeere", "Eiche"
+];
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timer = 6;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timer--;
+    updateTimerUI();
+    if (timer <= 0) {
+      clearInterval(timerInterval);
+      messageDiv.textContent = "⏰ Zeit abgelaufen! KI gewinnt!";
+      aiScore++;
+      updateScore();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  timerDiv.textContent = `⏳ Time left: ${timer}`;
+  timerDiv.className = '';
+  if (timer >= 4) timerDiv.classList.add('timer-green');
+  else if (timer >= 2) timerDiv.classList.add('timer-yellow');
+  else timerDiv.classList.add('timer-red');
+}
+
+function playerTurn() {
+  const word = playerInput.value.trim();
+  if (!word) return;
+
+  // Prüfen: Wort darf nicht wiederholt werden
+  if (wordsUsed.includes(word.toLowerCase())) {
+    messageDiv.textContent = "❌ Dieses Wort wurde schon verwendet!";
+    playerInput.value = '';
+    return;
+  }
+
+  // Prüfen: muss mit letztem Buchstaben starten
+  if (wordsUsed.length > 0) {
+    const lastWord = wordsUsed[wordsUsed.length - 1];
+    if (word[0].toLowerCase() !== lastWord.slice(-1).toLowerCase()) {
+      messageDiv.textContent = `❌ Dein Wort muss mit "${lastWord.slice(-1)}" beginnen`;
+      playerInput.value = '';
+      return;
+    }
+  }
+
+  addWord(word, 'player');
+  playerScore++;
+  updateScore();
+  playerInput.value = '';
+  messageDiv.textContent = '';
+
+  clearInterval(timerInterval);
+  setTimeout(aiTurn, 500);
+}
+
+function aiTurn() {
+  let lastLetter = wordsUsed[wordsUsed.length - 1].slice(-1).toLowerCase();
+  let options = aiWords.filter(w => w[0].toLowerCase() === lastLetter && !wordsUsed.includes(w.toLowerCase()));
+  
+  if (options.length === 0) {
+    messageDiv.textContent = "🎉 Du gewinnst, KI hat kein Wort!";
+    playerScore++;
+    updateScore();
+    return;
+  }
+
+  let aiWord = options[Math.floor(Math.random() * options.length)];
+  addWord(aiWord, 'ai');
+  aiScore++;
+  updateScore();
+  startTimer();
+}
+
+function addWord(word, player) {
+  wordsUsed.push(word.toLowerCase());
+  const div = document.createElement('div');
+  div.className = 'wordItem';
+  div.textContent = (player === 'player' ? '🟢 ' : '🔴 ') + word;
+  wordBoard.appendChild(div);
+  wordBoard.scrollTop = wordBoard.scrollHeight;
+}
+
+function updateScore() {
+  scoreDiv.textContent = `Player: ${playerScore} | AI: ${aiScore}`;
+}
+
+function resetGame() {
+  wordsUsed = [];
+  playerScore = 0;
+  aiScore = 0;
+  wordBoard.innerHTML = '';
+  messageDiv.textContent = '';
+  playerInput.value = '';
+  updateScore();
+  startTimer();
+}
+
+startTimer();
+</script>
+
+</body>
+</html>
