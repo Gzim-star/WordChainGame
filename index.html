@@ -15,8 +15,8 @@
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
-    background: #ffffff; /* Hintergrund weiß */
-    color: black;
+    background: #000000; /* ✅ Hintergrund SCHWARZ */
+    color: white;
     text-align: center;
   }
 
@@ -24,20 +24,20 @@
     width: 90%;
     max-width: 700px;
     padding: 20px;
-    background: #000000; /* Tablet schwarz */
+    background: #000000; /* ✅ Tablet SCHWARZ */
     border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    box-shadow: 0 0 25px rgba(255,255,255,0.08);
   }
 
   h1 {
     font-size: 1.8em;
     margin-bottom: 20px;
     color: #4dd0e1;
-    font-family: 'Press Start 2P', cursive; /* Pixel-Font für Titel */
+    font-family: 'Press Start 2P', cursive; /* Pixel Style */
   }
 
   #wordDisplay {
-    font-size: 1.5em;
+    font-size: 1.4em;
     margin: 20px 0;
     min-height: 50px;
     color: white;
@@ -55,7 +55,7 @@
     font-size: 1em;
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid #ccc;
+    border: none;
     margin-bottom: 15px;
     text-align: center;
   }
@@ -83,8 +83,8 @@
   }
 
   @media (max-width: 768px) {
-    h1 { font-size: 1.5em; }
-    #wordDisplay { font-size: 1.3em; }
+    h1 { font-size: 1.4em; }
+    #wordDisplay { font-size: 1.2em; }
     #playerWord { font-size: 0.9em; }
     button { font-size: 0.9em; padding: 10px 20px; }
   }
@@ -109,61 +109,67 @@ let currentWord = "Apple";
 const usedWords = [currentWord];
 
 const wordList = [
-  "Apple", "Elephant", "Tiger", "Rabbit", "Tree", "Eagle", "Egg", "Giraffe",
-  "Fish", "Horse", "Orange", "Grapes", "Snake", "Emu", "Umbrella", "Lion",
-  "Nut", "Tapir", "Rat", "Tomato", "Owl", "Lemon", "Night", "Hat", "Turtle",
-  "Eel", "Lamb", "Bread", "Dog", "Goat", "Ant", "Seal", "Lily", "Yak", "Kangaroo"
+  "Apple","Elephant","Tiger","Rabbit","Tree","Eagle","Egg","Giraffe",
+  "Fish","Horse","Orange","Grapes","Snake","Emu","Umbrella","Lion",
+  "Nut","Tapir","Rat","Tomato","Owl","Lemon","Night","Hat","Turtle",
+  "Eel","Lamb","Bread","Dog","Goat","Ant","Seal","Lily","Yak","Kangaroo"
 ];
 
 function playWord() {
-  const playerWord = document.getElementById("playerWord").value.trim();
-  const messageDiv = document.getElementById("message");
+  const input = document.getElementById("playerWord");
+  const word = input.value.trim();
+  const message = document.getElementById("message");
 
-  if (!playerWord) return;
+  if (!word) return;
 
   const lastChar = currentWord.slice(-1).toLowerCase();
-  if (playerWord[0].toLowerCase() !== lastChar) {
-    messageDiv.textContent = `❌ Your word must start with "${lastChar.toUpperCase()}"!`;
+  if (word[0].toLowerCase() !== lastChar) {
+    message.textContent = `❌ Your word must start with "${lastChar.toUpperCase()}"`;
     return;
   }
 
-  if (usedWords.includes(playerWord)) {
-    messageDiv.textContent = "❌ This word has already been used!";
+  if (usedWords.includes(word)) {
+    message.textContent = "❌ This word was already used!";
     return;
   }
 
-  usedWords.push(playerWord);
-  currentWord = playerWord;
+  usedWords.push(word);
+  currentWord = word;
   document.getElementById("wordDisplay").textContent = `Your word: ${currentWord}`;
-  document.getElementById("playerWord").value = "";
-  messageDiv.textContent = "";
+  input.value = "";
+  message.textContent = "";
 
   setTimeout(aiTurn, 500);
 }
 
 function aiTurn() {
   const lastChar = currentWord.slice(-1).toLowerCase();
-  let possibleWords = wordList.filter(w => w[0].toLowerCase() === lastChar && !usedWords.includes(w));
+  const possible = wordList.filter(
+    w => w[0].toLowerCase() === lastChar && !usedWords.includes(w)
+  );
 
-  if (possibleWords.length === 0) {
-    document.getElementById("message").textContent = "🎉 You win! The AI cannot find a word.";
+  if (possible.length === 0) {
+    document.getElementById("message").textContent =
+      "🎉 You win! The AI has no word.";
     return;
   }
 
-  let bestWord = possibleWords[0];
-  let maxOptions = -1;
+  let best = possible[0];
+  let max = -1;
 
-  for (let w of possibleWords) {
-    const nextChar = w.slice(-1).toLowerCase();
-    const playerOptions = wordList.filter(p => p[0].toLowerCase() === nextChar && !usedWords.includes(p));
-    if (playerOptions.length > maxOptions) {
-      maxOptions = playerOptions.length;
-      bestWord = w;
+  for (let w of possible) {
+    const next = w.slice(-1).toLowerCase();
+    const options = wordList.filter(
+      p => p[0].toLowerCase() === next && !usedWords.includes(p)
+    );
+    if (options.length > max) {
+      max = options.length;
+      best = w;
     }
   }
 
-  usedWords.push(bestWord);
-  currentWord = bestWord;
+  usedWords.push(best);
+  currentWord = best;
   document.getElementById("wordDisplay").textContent = `AI says: ${currentWord}`;
 }
 </script>
