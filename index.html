@@ -144,31 +144,6 @@ function playWord() {
   const word = input.value.trim();
   const message = document.getElementById("message");
 
-  let word = input.value.trim().toLowerCase();
-word = word.charAt(0).toUpperCase() + word.slice(1);
-
-const lastChar = currentWord.slice(-1).toLowerCase();
-const reversed = currentWord.split("").reverse().join("").toLowerCase();
-
-if (word[0].toLowerCase() !== lastChar) {
-  message.textContent = `❌ Your word must start with "${lastChar.toUpperCase()}"`;
-  return;
-}
-
-if (word.toLowerCase() === currentWord.toLowerCase()) {
-  message.textContent = "❌ You cannot repeat the same word!";
-  return;
-}
-
-if (word.toLowerCase() === reversed) {
-  message.textContent = "❌ Reversed words are not allowed!";
-  return;
-}
-
-if (usedWords.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
-  message.textContent = "❌ This word was already used!";
-  return;
-}
   if (!word) return;
 
   const lastChar = currentWord.slice(-1).toLowerCase();
