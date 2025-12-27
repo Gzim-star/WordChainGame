@@ -107,9 +107,7 @@ button:hover { background: #00000000; }
 .modal-content p {
   white-space: pre-line;
 }
-.modal.open {
-  display: block;
-}
+
 </style>
 </head>
 <body>
@@ -235,8 +233,11 @@ function typeText(element, text, speed = 15) {
 
   typing();
 }
-  
-// ========================== VARIABLES ==========================
+
+.modal.open {
+  display: block;  
+}
+  // ========================== VARIABLES ==========================
 let stage='start', wordScore=0, ticScore={player:0,ai:0,draw:0};
 let currentWord='', usedWords=[], wordList=[];
 let board=[], gameOver=false;
