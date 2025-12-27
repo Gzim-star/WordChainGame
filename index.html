@@ -32,7 +32,7 @@ body {
   color: whith;
   font-size: 28px;
   cursor: pointer;
-  z-index: 2000;
+  z-index: 1000;
 }
 #tipButton:hover { color: #00000000; }
 
@@ -107,7 +107,6 @@ button:hover { background: #00000000; }
 .modal-content p {
   white-space: pre-line;
 }
-
 </style>
 </head>
 <body>
@@ -206,18 +205,13 @@ Only those who think cleverly, react quickly, and recognize patterns can reach t
     
   `;
   typeText(tipModal.querySelector('p'), tipText, 0.5);
-  
+  tipModal.style.display = 'block';
 };
 
-closeBtn.onclick = () => {
-  tipModal.classList.remove('open');
-};
+closeBtn.onclick = () => tipModal.style.display = 'none';
 
-window.onclick = (e) => {
-  if (e.target === tipModal) {
-    tipModal.classList.remove('open');
-  }
- }
+window.onclick = (e) => { 
+  if(e.target === tipModal) tipModal.style.display = 'none';
 };// ========================== TYPEWRITER EFFECT ==========================
 function typeText(element, text, speed = 15) {
   element.innerHTML = "";
@@ -233,11 +227,8 @@ function typeText(element, text, speed = 15) {
 
   typing();
 }
-
-.modal.open {
-  display: block;  
-}
-  // ========================== VARIABLES ==========================
+  
+// ========================== VARIABLES ==========================
 let stage='start', wordScore=0, ticScore={player:0,ai:0,draw:0};
 let currentWord='', usedWords=[], wordList=[];
 let board=[], gameOver=false;
