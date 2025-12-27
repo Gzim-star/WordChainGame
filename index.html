@@ -55,11 +55,11 @@ body {
   max-width: 400px;
   color: white;
   text-align: left;
-  max-height: 63vh; /* maximale Höhe */
+  max-height: 70vh; /* maximale Höhe */
   overflow-y: auto;  /* scrollen, wenn Text zu lang ist */
 }
 .close {
-  color: white;
+  color: #00000000;
   float: right;
   font-size: 28px;
   font-weight: bold;
@@ -100,7 +100,7 @@ button:hover { background: #00000000; }
 .modal-content li {
   font-family: 'Press Start 2P', cursive;
   font-size: 0.8em;
-  color: whith;
+  color: white
 }
 .modal.open {
   display: block;
@@ -224,7 +224,7 @@ window.onclick = (e) => {
   }
 
 };// ========================== TYPEWRITER EFFECT ==========================
-function typeText(element, text, speed = 15) {
+function typeText(element, text, speed = 0.5) {
   element.innerHTML = "";
   let i = 0;
 
