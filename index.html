@@ -29,10 +29,10 @@ body {
   right: 20px;
   background: none;
   border: none;
-  color: whith;
+  color: white;
   font-size: 28px;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 2000;
 }
 #tipButton:hover { color: #00000000; }
 
@@ -53,13 +53,13 @@ body {
   border-radius: 12px;
   width: 80%;
   max-width: 400px;
-  color: whith;
+  color: white;
   text-align: left;
   max-height: 63vh; /* maximale Höhe */
   overflow-y: auto;  /* scrollen, wenn Text zu lang ist */
 }
 .close {
-  color: #00000000;
+  color: white;
   float: right;
   font-size: 28px;
   font-weight: bold;
@@ -102,7 +102,9 @@ button:hover { background: #00000000; }
   font-size: 0.8em;
   color: whith;
 }
-
+.modal.open {
+  display: block;
+}
 /* ➕ Zeilenumbrüche korrekt anzeigen */
 .modal-content p {
   white-space: pre-line;
@@ -131,6 +133,11 @@ const tipModal = document.getElementById('tipModal');
 const closeBtn = document.querySelector('.close');
 
 tipButton.onclick = () => {
+ // 🔁 öffnen / schließen
+  tipModal.classList.toggle('open');
+
+  // wenn geschlossen → nichts machen
+  if (!tipModal.classList.contains('open')) return
   let tipText = '';
   if(stage === 'start') tipText = `
 BrainTrials:
@@ -205,13 +212,17 @@ Only those who think cleverly, react quickly, and recognize patterns can reach t
     
   `;
   typeText(tipModal.querySelector('p'), tipText, 0.5);
-  tipModal.style.display = 'block';
+  
+};
+closeBtn.onclick = () => {
+  tipModal.classList.remove('open');
 };
 
-closeBtn.onclick = () => tipModal.style.display = 'none';
+window.onclick = (e) => {
+  if (e.target === tipModal) {
+    tipModal.classList.remove('open');
+  }
 
-window.onclick = (e) => { 
-  if(e.target === tipModal) tipModal.style.display = 'none';
 };// ========================== TYPEWRITER EFFECT ==========================
 function typeText(element, text, speed = 15) {
   element.innerHTML = "";
