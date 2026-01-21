@@ -76,58 +76,32 @@ button:hover { background: #4caf50; }
 </style>
 </head>
 <body>
-<div id="dimensionOverlay" style="
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.95);
-  z-index:6000;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-">
-<svg id="puzzle" width="300" height="300" viewBox="0 0 300 300">
-  <!-- Reihe 1 -->
-  <path d="M0 0 h100 v100 h-100 z" fill="#808080" data-id="1"/>
-  <path d="M100 0 h100 v100 h-100 z" fill="#808080" data-id="2"/>
-  <path d="M200 0 h100 v100 h-100 z" fill="#808080" data-id="3"/>
-
-  <!-- Reihe 2 -->
-  <path d="M0 100 h100 v100 h-100 z" fill="#808080" data-id="4"/>
-  <path d="M100 100 h100 v100 h-100 z" fill="#808080" data-id="5"/>
-  <path d="M200 100 h100 v100 h-100 z" fill="#808080" data-id="6"/>
-
-  <!-- Reihe 3 -->
-  <path d="M0 200 h100 v100 h-100 z" fill="#808080" data-id="7"/>
-  <path d="M100 200 h100 v100 h-100 z" fill="#808080" data-id="8"/>
-  <path d="M200 200 h100 v100 h-100 z" fill="#808080" data-id="9"/>
-</svg>
+<div style="width:120px;height:120px;">
+  <svg width="120" height="120" viewBox="0 0 120 120">
+    <path d="
+      M10 10
+      h35
+      c5 0 5 -10 10 -10
+      c5 0 5 10 10 10
+      h35
+      v35
+      c0 5 10 5 10 10
+      c0 5 -10 5 -10 10
+      v35
+      h-35
+      c-5 0 -5 10 -10 10
+      c-5 0 -5 -10 -10 -10
+      h-35
+      v-35
+      c0 -5 -10 -5 -10 -10
+      c0 -5 10 -5 10 -10
+      z
+    "
+    fill="#808080"
+    stroke="rgba(255,255,255,0.18)"
+    stroke-width="1"/>
+  </svg>
 </div>
- <svg width="120" height="120" viewBox="0 0 120 120">
-  <path d="
-    M10 10
-    h35
-    c5 0 5 -10 10 -10
-    c5 0 5 10 10 10
-    h35
-    v35
-    c0 5 10 5 10 10
-    c0 5 -10 5 -10 10
-    v35
-    h-35
-    c-5 0 -5 10 -10 10
-    c-5 0 -5 -10 -10 -10
-    h-35
-    v-35
-    c0 -5 -10 -5 -10 -10
-    c0 -5 10 -5 10 -10
-    z
-  "
-  fill="#808080"
-  stroke="rgba(255,255,255,0.15)"
-  stroke-width="1"
-  />
-</svg>
   <div id="gameContainer">
   <h1>🧠</h1>
   <div id="wordDisplay">Start word: Apple</div>
