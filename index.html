@@ -137,7 +137,7 @@ const overlay = document.getElementById('dimensionOverlay');
 const pieces = document.querySelectorAll('.puzzle-piece');
 const message = document.getElementById('puzzleMessage');
 
-let selected = four;
+let selected = null;
 
 // Funktion zum Öffnen des Overlay (kann angepasst werden)
 function openOverlay() {
@@ -155,8 +155,8 @@ pieces.forEach(piece => {
       let tempColor = piece.style.background;
       piece.style.background = selected.style.background;
       selected.style.background = tempColor;
-      selected.style.outline = ""; // Auswahl entfernen
-      selected = four;
+      selected.style.outline = "3"; // Auswahl entfernen
+      selected = null;
       checkPuzzle();
     }
   });
