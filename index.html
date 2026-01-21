@@ -91,7 +91,7 @@ button:hover { background: #4caf50; }
   align-items:center;
   padding:20px;
 ">
-  <p>🧩 Solve the 3x3 puzzle to close this overlay!</p>
+  <p>🧩</p>
   <div id="puzzle" style="
     display:grid;
     grid-template-columns: 100px 100px 100px;
@@ -166,13 +166,13 @@ function checkPuzzle(){
   const correctColors = ["red","blue","green","yellow","orange","purple","pink","cyan","white"];
   const currentColors = Array.from(pieces).map(p => p.style.background);
   if(currentColors.join() === correctColors.join()){
-    message.textContent = "✅ Correct! Overlay will close...";
+    message.textContent = "✅";
     setTimeout(() => {
       overlay.style.display = 'none';
       message.textContent = "";
     }, 1000);
   } else {
-    message.textContent = "🧩 Not solved yet!";
+    
   }
 }
 
