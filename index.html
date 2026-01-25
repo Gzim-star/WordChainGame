@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #000;
+    background-color: #000; /* Schwarzer Hintergrund */
     font-family: Arial, sans-serif;
     overflow: hidden;
   }
@@ -26,21 +26,13 @@
 
   /* Zellen */
   .cell {
-    background-color: #808080;
+    background-color: #808080; /* Grau */
     cursor: pointer;
     transition: opacity 0.2s, transform 0.2s;
   }
 
   .active {
-    opacity: 0.4;
-    animation: pulse 1.5s infinite;
-  }
-
-  /* Puls-Effekt */
-  @keyframes pulse {
-    0% { box-shadow: 0 0 5px gold; transform: scale(1); }
-    50% { box-shadow: 0 0 15px gold; transform: scale(1.05); }
-    100% { box-shadow: 0 0 5px gold; transform: scale(1); }
+    opacity: 0.4; /* Leichte Transparenz, kein Puls */
   }
 
   /* Restart Button */
@@ -56,7 +48,6 @@
     cursor: pointer;
     box-shadow: 0 0 10px 3px gold;
     display: none;
-    animation: pulse 2s infinite;
     z-index: 1000;
   }
 </style>
