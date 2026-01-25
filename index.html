@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>State Puzzle</title>
+<title>State Puzzle 6x6</title>
 <style>
   body {
     margin: 0;
@@ -10,39 +10,36 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #000; /* Schwarzer Hintergrund */
+    background-color: #000;
     font-family: Arial, sans-serif;
     overflow: hidden;
   }
 
-  /* Grid */
   #grid {
     display: grid;
-    grid-template-columns: repeat(3, 80px);
-    grid-template-rows: repeat(3, 80px);
-    gap: 6px;
+    grid-template-columns: repeat(6, 60px); /* 6 Spalten */
+    grid-template-rows: repeat(6, 60px);    /* 6 Reihen */
+    gap: 5px;
     transition: opacity 0.5s;
   }
 
-  /* Zellen */
   .cell {
-    background-color: #808080; /* Grau */
+    background-color: #808080;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.2s;
   }
 
   .active {
-    opacity: 0.4; /* Leichte Transparenz, kein Puls */
+    opacity: 0.4;
   }
 
-  /* Restart Button */
   #restart {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background: gold;
     cursor: pointer;
@@ -60,8 +57,9 @@
 <script>
 const grid = document.getElementById("grid");
 const restartBtn = document.getElementById("restart");
-const size = 3;
+const size = 6; // 6x6 Grid
 let state = [];
+let gameOver = false;
 
 // Zufällige Initialisierung
 for(let i=0; i<size*size; i++){
@@ -74,7 +72,9 @@ function render() {
   state.forEach((v, i) => {
     const cell = document.createElement("div");
     cell.className = "cell" + (v ? " active" : "");
-    cell.onclick = () => toggle(i);
+    cell.onclick = () => {
+      if(!gameOver) toggle(i);
+    };
     grid.appendChild(cell);
   });
 }
@@ -101,9 +101,11 @@ function checkWin() {
   if(state.every(v => v === 0)){
     grid.style.opacity = "0.3";
     restartBtn.style.display = "block";
+    gameOver = true;
   } else {
     grid.style.opacity = "1";
     restartBtn.style.display = "none";
+    gameOver = false;
   }
 }
 
@@ -112,6 +114,7 @@ restartBtn.onclick = () => {
   for(let i=0;i<size*size;i++){
     state[i] = Math.random() > 0.5 ? 1 : 0;
   }
+  gameOver = false;
   render();
   checkWin();
 }
