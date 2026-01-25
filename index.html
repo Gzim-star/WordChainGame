@@ -8,28 +8,37 @@
     margin: 0;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: #000;
     font-family: Arial, sans-serif;
     overflow: hidden;
+    color: white;
+  }
+
+  /* Text über dem Board */
+  #solutionText {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
   }
 
   /* Grid */
   #grid {
     display: grid;
-    grid-template-columns: repeat(6, 60px); /* 6 Spalten */
-    grid-template-rows: repeat(6, 60px);    /* 6 Reihen */
+    grid-template-columns: repeat(6, 60px);
+    grid-template-rows: repeat(6, 60px);
     gap: 5px;
     transition: opacity 0.5s;
   }
 
-  /* Zellen - jetzt rund */
+  /* Zellen rund */
   .cell {
     background-color: #808080;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.2s;
-    border-radius: 50%; /* macht die Zellen rund */
+    border-radius: 50%; /* rund */
   }
 
   .active {
@@ -52,34 +61,57 @@
     z-index: 1000;
   }
 
-  /* Lösung Button */
+  /* Lösung Button unter dem Board, zentriert und farbig */
   #solutionBtn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: gold;
+    display: block;
+    margin: 15px auto 0 auto; /* Abstand oben, zentriert */
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 0 10px 3px gold;
+    background-color: limegreen;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+
+  #solutionBtn:hover {
+    background-color: #32cd32; /* Hover Effekt */
+  }
+
+  /* Unsichtbarer Bereich für die Lösung */
+  #solutionHidden {
     display: none;
-    z-index: 2000;
+    margin-top: 10px;
+    color: lime; /* grün */
+    font-weight: bold;
   }
 </style>
 </head>
 <body>
 
+<!-- Text über dem Board -->
+<div id="solutionText">Hier ist die Lösung 🧐</div>
+
+<!-- Grid -->
 <div id="grid"></div>
+
+<!-- Restart Button -->
 <div id="restart" title="Restart"></div>
+
+<!-- Lösung Button -->
 <button id="solutionBtn">Lösung anzeigen</button>
+
+<!-- Unsichtbarer Bereich für die Lösung -->
+<div id="solutionHidden"></div>
 
 <script>
 const grid = document.getElementById("grid");
 const restartBtn = document.getElementById("restart");
 const solutionBtn = document.getElementById("solutionBtn");
-const size = 6; // 6x6 Grid
+const solutionHidden = document.getElementById("solutionHidden");
+const size = 6; 
 let state = [];
 let gameOver = false;
 
@@ -146,13 +178,11 @@ restartBtn.onclick = () => {
 function solvePuzzle(state) {
   const n = size*size;
   let matrix = [];
-  let vector = state.slice(); // Kopie
+  let vector = state.slice(); 
 
-  // Matrix erstellen
   for(let i=0;i<n;i++){
     matrix[i] = Array(n).fill(0);
     matrix[i][i] = 1;
-
     let row = Math.floor(i/size);
     let col = i%size;
     if(row>0) matrix[i][i-size] = 1;
@@ -161,7 +191,6 @@ function solvePuzzle(state) {
     if(col<size-1) matrix[i][i+1] = 1;
   }
 
-  // Gauss-Jordan-Elimination Mod 2
   for(let i=0;i<n;i++){
     if(matrix[i][i]===0){
       for(let j=i+1;j<n;j++){
@@ -183,7 +212,6 @@ function solvePuzzle(state) {
     }
   }
 
-  // vector enthält die Lösung
   let solution = [];
   for(let i=0;i<n;i++){
     if(vector[i]===1) solution.push(i);
@@ -194,7 +222,8 @@ function solvePuzzle(state) {
 // Button klick: Lösung anzeigen
 solutionBtn.onclick = () => {
   let solution = solvePuzzle(state);
-  alert("Klicke diese Zellen: " + solution.map(i => `(${Math.floor(i/6)+1},${i%6+1})`).join(", "));
+  solutionHidden.style.display = "block"; // sichtbar unter Board
+  solutionHidden.innerText = solution.map(i => `(${Math.floor(i/6)+1},${i%6+1})`).join(", ");
 }
 
 render();
