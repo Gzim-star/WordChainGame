@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>State Puzzle 6x6</title>
+<title>State Puzzle 6x6 Rund</title>
 <style>
   body {
     margin: 0;
@@ -24,11 +24,12 @@
     transition: opacity 0.5s;
   }
 
-  /* Zellen */
+  /* Zellen - jetzt rund */
   .cell {
     background-color: #808080;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.2s;
+    border-radius: 50%; /* macht die Zellen rund */
   }
 
   .active {
