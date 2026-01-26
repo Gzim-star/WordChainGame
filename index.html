@@ -21,12 +21,25 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: opacity 1.2s ease; /* 👈 Fade */
+  transition: opacity 1.2s ease;
 }
 
 .game-wrapper.hide {
   opacity: 0;
   pointer-events: none;
+}
+
+/* 🔍 HINT */
+#hint {
+  margin-bottom: 16px;
+  color: rgba(255,255,255,0.55);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+  text-align: center;
 }
 
 /* Grid */
@@ -72,6 +85,9 @@ body {
 <body>
 
 <div class="game-wrapper">
+  <!-- 🔍 HINT TEXT -->
+  <div id="hint">Visibility is also a state.</div>
+
   <div id="grid"></div>
   <button id="solutionBtn">Lösung anzeigen</button>
 </div>
@@ -80,6 +96,7 @@ body {
 const grid = document.getElementById("grid");
 const solutionBtn = document.getElementById("solutionBtn");
 const wrapper = document.querySelector(".game-wrapper");
+const hint = document.getElementById("hint");
 
 const size = 12;
 let state = [];
@@ -135,16 +152,27 @@ function checkSolved() {
 
   if (state.every(v => v === 0)) {
     solved = true;
-
     wrapper.classList.add("hide");
-
-    setTimeout(() => {
-      wrapper.style.display = "none";
-    }, 1300);
+    setTimeout(() => wrapper.style.display = "none", 1300);
   }
 }
 
-/* Lösung berechnen (bleibt gleich) */
+/* 🕒 HINT TIMING */
+setTimeout(() => {
+  hint.style.opacity = "1";
+
+  setTimeout(() => {
+    hint.style.opacity = "0";
+  }, 5000);
+
+}, 10000);
+
+/* Lösung Button */
+solutionBtn.onclick = () => {
+  alert("Klicke diese Zellen:\n" + solvePuzzle(state).join(", "));
+};
+
+/* Solver bleibt unverändert */
 function solvePuzzle(state) {
   const n = size * size;
   let matrix = [];
@@ -183,11 +211,6 @@ function solvePuzzle(state) {
     .map((v, i) => v ? `(${Math.floor(i/size)+1},${i%size+1})` : null)
     .filter(Boolean);
 }
-
-/* Button */
-solutionBtn.onclick = () => {
-  alert("Klicke diese Zellen:\n" + solvePuzzle(state).join(", "));
-};
 
 render();
 </script>
