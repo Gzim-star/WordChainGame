@@ -21,6 +21,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: opacity 1.2s ease; /* 👈 Fade */
+}
+
+.game-wrapper.hide {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Grid */
@@ -41,7 +47,7 @@ body {
   justify-content: center;
   font-size: 16px;
   font-weight: bold;
-  color: black; /* ZAHLEN SCHWARZ */
+  color: black;
   user-select: none;
 }
 
@@ -61,10 +67,6 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
-
-#solutionBtn:hover {
-  background: #00000000;
-}
 </style>
 </head>
 
@@ -78,8 +80,11 @@ body {
 <script>
 const grid = document.getElementById("grid");
 const solutionBtn = document.getElementById("solutionBtn");
+const wrapper = document.querySelector(".game-wrapper");
+
 const size = 12;
 let state = [];
+let solved = false;
 
 /* Initialisierung */
 for (let i = 0; i < size * size; i++) {
@@ -97,16 +102,17 @@ function render() {
     const row = Math.floor(i / size);
     const col = i % size;
 
-    /* 🔢 NUR ERSTE REIHE & ERSTE SPALTE */
-    if (row === 0) {
-      cell.textContent = col + 1;
-    } else if (col === 0) {
-      cell.textContent = row + 1;
-    }
+    if (row === 0) cell.textContent = col + 1;
+    else if (col === 0) cell.textContent = row + 1;
 
-    cell.onclick = () => toggle(i);
+    cell.onclick = () => {
+      if (!solved) toggle(i);
+    };
+
     grid.appendChild(cell);
   });
+
+  checkSolved();
 }
 
 /* Toggle */
@@ -124,7 +130,22 @@ function toggle(i) {
   render();
 }
 
-/* Lösung berechnen */
+/* ✅ Prüfen ob gelöst */
+function checkSolved() {
+  if (solved) return;
+
+  if (state.every(v => v === 0)) {
+    solved = true;
+
+    wrapper.classList.add("hide");
+
+    setTimeout(() => {
+      wrapper.style.display = "none";
+    }, 1300);
+  }
+}
+
+/* Lösung berechnen (bleibt gleich) */
 function solvePuzzle(state) {
   const n = size * size;
   let matrix = [];
