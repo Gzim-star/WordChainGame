@@ -67,17 +67,42 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+/* Meta Hinweis */
+#textHint {
+  position: absolute;
+  top: 40%;              /* über dem Board */
+  left: 50%
+  color: #888;
+  font-size: 20px;
+  font-family: 'Press Start 2P', cursive;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  text-align: center;
+}
 </style>
 </head>
 
 <body>
-
+<div id="textHint">Visibility is also a state.</div>
 <div class="game-wrapper">
+  <div class="game-wrapper">
   <div id="grid"></div>
   <button id="solutionBtn">Lösung anzeigen</button>
 </div>
 
 <script>
+/* 👁 Meta-Hinweis: erscheint & verschwindet */
+const textHint = document.getElementById("textHint");
+
+setTimeout(() => {
+  textHint.style.opacity = "1";
+
+  setTimeout(() => {
+    textHint.style.opacity = "0";
+  }, 5000);
+
+}, 5000);
 const grid = document.getElementById("grid");
 const solutionBtn = document.getElementById("solutionBtn");
 const wrapper = document.querySelector(".game-wrapper");
