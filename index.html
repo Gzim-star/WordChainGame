@@ -104,6 +104,10 @@ function render() {
     const row = Math.floor(i / size);
     const col = i % size;
 
+// Ecke oben-links: 1 anzeigen
+if (row === 0 && col === 0) {
+  cell.textContent = "1";
+}
 // Oben: 1 → 12
 if (row === 0 && col !== 0) {
   cell.textContent = col + 1;
