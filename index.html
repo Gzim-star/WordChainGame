@@ -73,10 +73,7 @@ body {
 
 /* Lösung Overlay */
 #solutionOverlay {
-  position: absolute;
-  top: 39.5%;
-  left: 46.5%;
-  transform: translate(-50%, -50%);
+  position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   display: flex;
@@ -90,7 +87,11 @@ body {
 }
 
 #solutionOverlay.show {
-  opacity: 1;
+  position: absolute;
+   top: 39.5%;
+    left: 46.5%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
   pointer-events: auto;
 }
 
