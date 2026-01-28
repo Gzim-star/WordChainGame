@@ -79,7 +79,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 60px;      /* verschiebt es etwas nach unten */
+  padding-top: 100px;      /* verschiebt es etwas nach unten */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -97,10 +97,10 @@ body {
   color: white;
   padding: 18px 22px;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 16px;
   max-width: 85vw;
   text-align: center;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 </style>
 </head>
@@ -131,7 +131,7 @@ const solutionBox = document.getElementById("solutionBox");
 
 solutionBtn.onclick = () => {
   solutionBox.textContent =
-    "Klicke diese Zellen:\n" + solvePuzzle(state).join(", ");
+    "\n" + solvePuzzle(state).join(", ");
 
   solutionOverlay.classList.add("show");
 
