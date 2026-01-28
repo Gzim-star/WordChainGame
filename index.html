@@ -71,15 +71,35 @@ body {
   opacity: 0.4;
 }
 
-/* BUTTON */
-#solutionBtn {
-  margin-top: 18px;
-  padding: 12px 26px;
-  font-size: 16px;
-  background: transparent;
+/* Lösung Overlay */
+#solutionOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 50;
+}
+
+#solutionOverlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Lösung Box */
+#solutionBox {
+  background: black;
   color: white;
-  border: none;
-  cursor: pointer;
+  padding: 18px 22px;
+  border-radius: 10px;
+  font-size: 12px;
+  max-width: 85vw;
+  text-align: center;
+  line-height: 1.6;
 }
 </style>
 </head>
@@ -92,14 +112,29 @@ body {
 <!-- PUZZLE -->
 <div class="game-wrapper">
   <div id="grid"></div>
-  <button id="solutionBtn">Lösung anzeigen</button>
+  <div id="solutionOverlay">
+  <div id="solutionBox"></div>
 </div>
+
 
 <script>
 const flowImage = document.getElementById("flowImage");
 const grid = document.getElementById("grid");
 const wrapper = document.querySelector(".game-wrapper");
-const solutionBtn = document.getElementById("solutionBtn");
+const solutionOverlay = document.getElementById("solutionOverlay");
+const solutionBox = document.getElementById("solutionBox");
+
+solutionBtn.onclick = () => {
+  solutionBox.textContent =
+    "Klicke diese Zellen:\n" + solvePuzzle(state).join(", ");
+
+  solutionOverlay.classList.add("show");
+};
+
+// 👇 Klick IRGENDWO schließt es
+solutionOverlay.onclick = () => {
+  solutionOverlay.classList.remove("show");
+};
 
 const size = 12;
 let state = [];
@@ -229,9 +264,7 @@ function solvePuzzle(state) {
     .filter(Boolean);
 }
 
-solutionBtn.onclick = () => {
-  alert("Klicke diese Zellen:\n" + solvePuzzle(state).join(", "));
-};
+
 
 render();
 </script>
