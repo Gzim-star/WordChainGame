@@ -38,7 +38,7 @@ body {
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1.4s ease;
+  transition: opacity 2.5s ease;
 }
 
 .game-wrapper.show {
@@ -167,24 +167,23 @@ function toggle(i) {
   render();
 }
 
-/* CHECK SOLVED */
 function checkSolved() {
   if (solved) return;
 
   if (state.every(v => v === 0)) {
     solved = true;
 
+    // 🔥 SOFORT Fade-Out starten
+    wrapper.classList.remove("show");
+
+    // ⏳ Nach Fade zurück zum Flow
     setTimeout(() => {
-      wrapper.classList.remove("show");
+      flowImage.style.display = "block";
+      flowImage.style.opacity = 1;
 
-      setTimeout(() => {
-        flowImage.style.display = "block";
-        flowImage.style.opacity = 1;
-        initState();
-        render();
-      }, 1400);
-
-    }, 3000);
+      initState();
+      render();
+    }, 2500); // muss zur CSS-Dauer passen
   }
 }
 
