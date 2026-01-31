@@ -145,7 +145,7 @@ const wrapper = document.querySelector(".game-wrapper");
 const solutionBtn = document.getElementById("solutionBtn");
 const solutionOverlay = document.getElementById("solutionOverlay");
 const solutionBox = document.getElementById("solutionBox");
-
+let ACTIVE_PUZZLE = "STATE"; // STATE → IQ
 solutionBtn.onclick = () => {
 solutionBox.innerHTML =
   solvePuzzle(state)
@@ -186,6 +186,20 @@ function initState() {
 }
 initState();
 
+function startPuzzle() {
+  grid.innerHTML = "";
+
+  if (ACTIVE_PUZZLE === "STATE") {
+    solutionBtn.style.display = "block";
+    initState();
+    render();
+  }
+
+  if (ACTIVE_PUZZLE === "IQ") {
+    solutionBtn.style.display = "none";
+    generateGrid(); // ← dein IQ-Puzzle Code
+  }
+}
 /* FLOW → PUZZLE */
 flowImage.onclick = () => {
   flowImage.style.opacity = 0;
@@ -193,6 +207,9 @@ flowImage.onclick = () => {
   setTimeout(() => {
     flowImage.style.display = "none";
     wrapper.classList.add("show");
+
+    ACTIVE_PUZZLE = "STATE";
+    startPuzzle();
   }, 1400);
 };
 
