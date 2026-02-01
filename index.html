@@ -125,6 +125,48 @@ body {
   font-size: 13px;
   cursor: pointer;
 }
+#iqSolutionOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 60px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 50;
+}
+
+#iqSolutionOverlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#iqSolutionBox {
+  background: black;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 0px;
+  font-size: 25px;
+  line-height: 1.4;
+  width: 90vw;
+  max-width: 90vh;
+  overflow-y: auto;
+  text-align: center;
+}
+
+#iqSolutionBtn {
+  margin-top: 24px;
+  align-self: center;
+  background: rgba(255,255,255,0.85);
+  color: black;
+  border: none;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -143,10 +185,15 @@ body {
 </div>
 
 <!-- IQ PUZZLE -->
+<!-- IQ PUZZLE -->
 <div id="iqWrapper" class="game-wrapper">
-  <h1 style="color:white"></h1>
+  <h1 style="color:white">IQ</h1>
   <div id="iqGrid" class="grid"></div>
   <div id="message"></div>
+  <button id="iqSolutionBtn">Lösung</button>  <!-- 👈 neuer Button -->
+  <div id="iqSolutionOverlay" style="display:none;">
+    <div id="iqSolutionBox"></div>
+  </div>
 </div>
 
 <script>
@@ -168,7 +215,25 @@ let solvedState = false;
 const iqWrapper = document.getElementById("iqWrapper");
 const iqGrid = document.getElementById("iqGrid");
 const message = document.getElementById("message");
+// IQ Lösungs-Button & Overlay
+const iqSolutionBtn = document.getElementById("iqSolutionBtn");
+const iqSolutionOverlay = document.getElementById("iqSolutionOverlay");
+const iqSolutionBox = document.getElementById("iqSolutionBox");
 
+iqSolutionBtn.onclick = () => {
+  // Liste der Wörter anzeigen
+  iqSolutionBox.innerHTML = words
+    .map(w => `<span style="display:inline-block;min-width:60px;margin:2px 6px;opacity:.85">${w}</span>`)
+    .join("");
+
+  iqSolutionOverlay.classList.add("show");
+
+  // Automatisch schließen nach 5 Sekunden
+  setTimeout(() => iqSolutionOverlay.classList.remove("show"), 5000);
+};
+
+// Klick irgendwo schließt Overlay
+iqSolutionOverlay.onclick = () => iqSolutionOverlay.classList.remove("show");
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const words = [
   "GZIM",  "MIND", "FLOW", "FOCUS", "VOID", "TRACE",
