@@ -239,8 +239,8 @@ body {
 <!-- IQ Color PUZZLE -->
 <div id="iqColorWrapper" class="game-wrapper">
   <h1 style="color:white"></h1>
-  <div id="iqGrid" class="grid"></div>
-  <div id="message"></div>
+  <div id="iqColorGrid" class="grid"></div>
+  <div id="colormessage"></div>
   <button id="iqColorSolutionBtn"></button>  <!-- 👈 neuer Button -->
   <div id="iqColorSolutionOverlay">
     <div id="iqColorSolutionBox"></div>
@@ -496,7 +496,7 @@ function checkClickIQ(div){
   if(div===expected){
     div.classList.add("correct"); currentIndex++;
     if(currentIndex===positions.length){
-      setTimeout(()=>{ exitToFlow(); },800);
+      setTimeout(()=>{ startIQColorPuzzle(); },800);
     }
   }else{
     div.classList.add("wrong");
