@@ -240,7 +240,7 @@ body {
 <div id="iqColorWrapper" class="game-wrapper">
   <h1 style="color:white"></h1>
   <div id="iqColorGrid" class="grid"></div>
-  <div id="colormessage"></div>
+  <div id="colorMessage"></div>
   <button id="iqColorSolutionBtn"></button>  <!-- 👈 neuer Button -->
   <div id="iqColorSolutionOverlay">
     <div id="iqColorSolutionBox"></div>
@@ -527,7 +527,7 @@ function startIQColorPuzzle(){
   colorOrder = 0;
 
   const selected = [];
-  while(selected.length < 12){
+  while(selected.length < 6){
     const c = colors[Math.floor(Math.random()*colors.length)];
     if(!selected.includes(c)) selected.push(c);
   }
