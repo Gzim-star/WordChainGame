@@ -510,18 +510,36 @@ function startIQColorPuzzle(){
   setTimeout(()=>{
     iqColorWrapper.classList.add("show");
     generateColorGrid();
-  }, 600); // gleiche Logik wie State → IQ
+  }, 900); // gleiche Logik wie State → IQ
 }
- const colors = [
-  { name:"RED", value:"#e53935" },
-  { name:"BLUE", value:"#1e88e5" },
-  { name:"GREEN", value:"#43a047" },
-  { name:"YELLOW", value:"#fdd835" },
-  { name:"PURPLE", value:"#8e24aa" },
-  { name:"ORANGE", value:"#fb8c00" },
-  { name:"CYAN", value:"#00acc1" },
-  { name:"PINK", value:"#ec407a" },
-  { name:"BROWN", value:"#6d4c41" }
+const colors = [
+  { name:"RED",        value:"#e53935" },
+  { name:"BLUE",       value:"#1e88e5" },
+  { name:"GREEN",      value:"#43a047" },
+  { name:"YELLOW",     value:"#fdd835" },
+  { name:"PURPLE",     value:"#8e24aa" },
+  { name:"ORANGE",     value:"#fb8c00" },
+  { name:"CYAN",       value:"#00acc1" },
+  { name:"PINK",       value:"#ec407a" },
+  { name:"BROWN",      value:"#6d4c41" },
+
+  { name:"LIME",       value:"#cddc39" },
+  { name:"TEAL",       value:"#00897b" },
+  { name:"INDIGO",     value:"#3949ab" },
+  { name:"AMBER",      value:"#ffb300" },
+  { name:"MAGENTA",    value:"#d81b60" },
+  { name:"VIOLET",     value:"#7e57c2" },
+  { name:"TURQUOISE",  value:"#26c6da" },
+  { name:"OLIVE",      value:"#827717" },
+  { name:"MAROON",     value:"#8e0000" },
+  { name:"NAVY",       value:"#0d47a1" },
+  { name:"GOLD",       value:"#f9a825" },
+  { name:"SILVER",     value:"#bdbdbd" },
+  { name:"PEACH",      value:"#ffab91" },
+  { name:"MINT",       value:"#66ffa6" },
+  { name:"CORAL",      value:"#ff7043" },
+  { name:"LAVENDER",   value:"#b39ddb" },
+  { name:"CHARCOAL",   value:"#424242" }
 ];
  function generateColorGrid(){
   iqColorGrid.innerHTML = "";
