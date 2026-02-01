@@ -512,6 +512,33 @@ function startIQColorPuzzle(){
     generateColorGrid();
   }, 900); // gleiche Logik wie State → IQ
 }
+iqColorSolutionBtn.onclick = () => {
+  iqColorSolutionBox.innerHTML = colorPositions
+    .sort((a,b)=>a.order-b.order)
+    .map(c => `
+      <span style="
+        display:inline-block;
+        min-width:90px;
+        margin:6px;
+        padding:6px 8px;
+        background:${c.value};
+        color:#000;
+        font-family:monospace;
+        font-size:14px;
+        opacity:.9;
+      ">
+        ${c.value}
+      </span>
+    `)
+    .join("");
+
+  iqColorSolutionOverlay.classList.add("show");
+
+  setTimeout(
+    () => iqColorSolutionOverlay.classList.remove("show"),
+    5000
+  );
+};
 const colors = [
   { name:"RED",        value:"#e53935" },
   { name:"BLUE",       value:"#1e88e5" },
@@ -563,7 +590,7 @@ const colors = [
 
       if(gridData[r][c]){
         div.style.background = gridData[r][c].color;
-        colorPositions.push({div, order:gridData[r][c].order});
+        colorPositions.push({div, order:gridData[r][c].order, value:gridData[r][c].color});
       } else {
         div.style.background = colors[Math.floor(Math.random()*colors.length)].value;
       }
