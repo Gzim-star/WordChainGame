@@ -370,30 +370,37 @@ function startIQPuzzle(){
 
 // GENERATE IQ GRID
 function generateIQGrid(){
-  iqGrid.innerHTML=""; message.textContent=""; currentIndex=0; positions=[]; globalOrder=0;
-  const WORDS_PER_GRID=6;
+  iqGrid.innerHTML = ""; 
+  message.textContent = "";
+  currentIndex = 0; 
+  positions = []; 
+  globalOrder = 0;
+
+  const WORDS_PER_GRID = 6;
   currentIQWords = [];  // ← hier speichern wir die gewählten Wörter
-  const selected=[];
-  while(selected.length<WORDS_PER_GRID){
-    const w=words[Math.floor(Math.random()*words.length)];
-    if(!selected.includes(w)) selected.push(w);
+  while(currentIQWords.length < WORDS_PER_GRID){
+    const w = words[Math.floor(Math.random()*words.length)];
+    if(!currentIQWords.includes(w)) currentIQWords.push(w);
   }
-  const gridData=Array.from({length:12},()=>Array(12).fill(null));
-  selected.forEach(w=>placeWordIQ(w,gridData));
+
+  const gridData = Array.from({length:12},()=>Array(12).fill(null));
+  currentIQWords.forEach(w => placeWordIQ(w, gridData));
+
   for(let r=0;r<12;r++){
     for(let c=0;c<12;c++){
       const div=document.createElement("div");
       div.className="cell";
       if(gridData[r][c]){
         div.textContent=gridData[r][c].letter;
-        positions.push({div,order:gridData[r][c].order});
-      }else{
-        div.textContent=alphabet[Math.floor(Math.random()*alphabet.length)];
+        positions.push({div, order:gridData[r][c].order});
+      } else {
+        div.textContent = alphabet[Math.floor(Math.random()*alphabet.length)];
       }
-      div.onclick=()=>checkClickIQ(div);
+      div.onclick = ()=>checkClickIQ(div);
       iqGrid.appendChild(div);
     }
   }
+
   positions.sort((a,b)=>a.order-b.order);
 }
 
