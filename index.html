@@ -451,8 +451,7 @@ solutionBtn.onclick = ()=>{
     return `<span style="display:inline-block;min-width:60px;margin:2px 6px;opacity:.85">${r} ' ${c}</span>`;
   }).join("");
   solutionOverlay.classList.add("show");
-  setTimeout(()=>solutionOverlay.classList.remove("show"),5000);
-};
+
 
 solutionOverlay.onclick = ()=>solutionOverlay.classList.remove("show");
 
@@ -585,8 +584,7 @@ iqSymbolSolutionBtn.onclick = () => {
 
   iqSymbolSolutionOverlay.classList.add("show");
 
-  setTimeout(() => iqSymbolSolutionOverlay.classList.remove("show"), 5000);
-};
+
 
 // Klick irgendwo schließt Overlay
 iqSymbolSolutionOverlay.onclick = () => iqSymbolSolutionOverlay.classList.remove("show");
@@ -728,11 +726,7 @@ iqColorSolutionBtn.onclick = () => {
 
   iqColorSolutionOverlay.classList.add("show");
 
-  setTimeout(
-    () => iqColorSolutionOverlay.classList.remove("show"),
-    5000
-  );
-};  
+  
 iqColorSolutionOverlay.onclick = () =>
   iqColorSolutionOverlay.classList.remove("show");
 const colors = [
