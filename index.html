@@ -571,9 +571,8 @@ function checkClickIQ(div){
 }
 function startIQSymbolPuzzle(){
   iqWrapper.classList.remove("show");
-
-  setTimeout(()=>{
-    iqSymbolWrapper.classList.add("show");
+    setTimeout(()=>{
+     iqSymbolWrapper.classList.add("show");
     generateSymbolGrid();
   }, 1500);
 }
@@ -689,8 +688,11 @@ function checkSymbolClick(div){
 function startIQColorPuzzle(){
   iqWrapper.classList.remove("show");
 
-  setTimeout(()=>{
-    iqColorWrapper.classList.add("show");
+    setTimeout(()=>{
+   
+     requestAnimationFrame(() => {
+
+     iqColorWrapper.classList.add("show");
     generateColorGrid();
   }, 1500); // gleiche Logik wie State → IQ
 }
