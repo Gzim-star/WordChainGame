@@ -578,7 +578,7 @@ function startIQSymbolPuzzle(){
 }
 
 iqSymbolSolutionBtn.onclick = () => {
-  iqSymbolSolutionBox.innerHTML = currentIQSymbol
+  iqSymbolSolutionBox.innerHTML = currentIQSymbolWords
     .map(w => `<span style="display:inline-block;min-width:60px;margin:2px 6px;opacity:.85">${w}</span>`)
     .join("");
 
@@ -588,11 +588,7 @@ iqSymbolSolutionBtn.onclick = () => {
 };
 
 // Klick irgendwo schließt Overlay
-iqSymbolSolutionOverlay.onclick = () => 
-  iqSymbolSolutionOverlay.classList.remove("show");
-
-
-
+iqSymbolSolutionOverlay.onclick = () => iqSymbolSolutionOverlay.classList.remove("show");
 const symbolAlphabet =
 "-/:;()£&@“.,?!’[]{}#%^*+=_\\|~<>€$¥•⇐⇒⇑⇓⇖⇗⇘⇙⬈⬉⬊⬋➔➜➝➞➤➥➦➧➨➙⟵⟶⟷⟸⟹⟺⇦⇠";
 
