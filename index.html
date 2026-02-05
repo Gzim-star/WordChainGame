@@ -3,155 +3,103 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Stick Figure Trial</title>
+<title>Logic Stick Trial</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
-    margin: 0;
-    background: black;
-    overflow: hidden;
-  }
-  canvas {
-    display: block;
-  }
+  body { margin:0; background:black; }
+  canvas { display:block; }
 </style>
 </head>
 
 <body>
-<canvas id="game"></canvas>
+<canvas id="c"></canvas>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
 
 // ===== PLAYER =====
-const player = {
-  x: 100,
-  y: canvas.height - 150,
-  vx: 0,
-  vy: 0,
-  w: 20,
-  h: 60,
-  onGround: false
-};
+const player = { x: 60, y: 200, size: 18 };
 
-// ===== PHYSICS =====
-const gravity = 0.8;
-const speed = 4;
-const jump = -14;
-
-// ===== OBSTACLES =====
-const obstacles = [
-  { x: 300, y: canvas.height - 80, w: 120, h: 20 },
-  { x: 520, y: canvas.height - 140, w: 120, h: 20 },
-  { x: 760, y: canvas.height - 200, w: 120, h: 20 }
+// ===== LOGIC TILES =====
+const tiles = [
+  { x:150, y:200, ok:true },
+  { x:230, y:200, ok:false },
+  { x:310, y:200, ok:true },
+  { x:390, y:200, ok:true },
+  { x:470, y:200, ok:false },
+  { x:550, y:200, ok:true }
 ];
 
-// ===== INPUT =====
-const keys = {};
-window.addEventListener("keydown", e => keys[e.key] = true);
-window.addEventListener("keyup", e => keys[e.key] = false);
+const startX = player.x;
 
-// ===== GAME LOOP =====
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
+// ===== INPUT =====
+addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") move(1);
+  if (e.key === "ArrowLeft") move(-1);
+});
+
+// ===== MOVE LOGIC =====
+function move(dir){
+  player.x += dir * 80;
+
+  const tile = tiles.find(t =>
+    Math.abs(player.x - t.x) < 20 &&
+    Math.abs(player.y - t.y) < 20
+  );
+
+  if (tile && !tile.ok) reset();
 }
 
-// ===== UPDATE =====
-function update() {
-  // Bewegung
-  if (keys["ArrowLeft"]) player.vx = -speed;
-  else if (keys["ArrowRight"]) player.vx = speed;
-  else player.vx = 0;
-
-  if (keys[" "] && player.onGround) {
-    player.vy = jump;
-    player.onGround = false;
-  }
-
-  player.vy += gravity;
-  player.x += player.vx;
-  player.y += player.vy;
-
-  // Boden
-  if (player.y + player.h > canvas.height - 20) {
-    player.y = canvas.height - 20 - player.h;
-    player.vy = 0;
-    player.onGround = true;
-  }
-
-  // Kollision Hindernisse
-  obstacles.forEach(o => {
-    if (
-      player.x < o.x + o.w &&
-      player.x + player.w > o.x &&
-      player.y < o.y + o.h &&
-      player.y + player.h > o.y
-    ) {
-      // von oben landen
-      if (player.vy > 0) {
-        player.y = o.y - player.h;
-        player.vy = 0;
-        player.onGround = true;
-      }
-    }
-  });
+// ===== RESET =====
+function reset(){
+  player.x = startX;
 }
 
 // ===== DRAW =====
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function draw(){
+  ctx.clearRect(0,0,c.width,c.height);
 
-  // Boden
-  ctx.fillStyle = "#222";
-  ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
-
-  // Hindernisse
-  ctx.fillStyle = "#555";
-  obstacles.forEach(o => {
-    ctx.fillRect(o.x, o.y, o.w, o.h);
+  // Tiles
+  tiles.forEach(t=>{
+    ctx.fillStyle = t.ok ? "#0f0" : "#400";
+    ctx.fillRect(t.x-20, t.y-20, 40, 40);
   });
 
-  drawStickFigure(player.x, player.y);
+  drawStick(player.x, player.y);
+  requestAnimationFrame(draw);
 }
 
-// ===== STICK FIGURE =====
-function drawStickFigure(x, y) {
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 2;
+// ===== STICK =====
+function drawStick(x,y){
+  ctx.strokeStyle="white";
+  ctx.lineWidth=2;
 
-  // Kopf
-  ctx.beginPath();
-  ctx.arc(x + 10, y - 10, 10, 0, Math.PI * 2);
+  ctx.beginPath(); // head
+  ctx.arc(x, y-12, 8, 0, Math.PI*2);
   ctx.stroke();
 
-  // Körper
-  ctx.beginPath();
-  ctx.moveTo(x + 10, y);
-  ctx.lineTo(x + 10, y + 30);
+  ctx.beginPath(); // body
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y+25);
   ctx.stroke();
 
-  // Arme
-  ctx.beginPath();
-  ctx.moveTo(x - 5, y + 15);
-  ctx.lineTo(x + 25, y + 15);
+  ctx.beginPath(); // arms
+  ctx.moveTo(x-10,y+10);
+  ctx.lineTo(x+10,y+10);
   ctx.stroke();
 
-  // Beine
-  ctx.beginPath();
-  ctx.moveTo(x + 10, y + 30);
-  ctx.lineTo(x - 5, y + 55);
-  ctx.moveTo(x + 10, y + 30);
-  ctx.lineTo(x + 25, y + 55);
+  ctx.beginPath(); // legs
+  ctx.moveTo(x,y+25);
+  ctx.lineTo(x-8,y+40);
+  ctx.moveTo(x,y+25);
+  ctx.lineTo(x+8,y+40);
   ctx.stroke();
 }
 
-loop();
+draw();
 </script>
 </body>
 </html>
