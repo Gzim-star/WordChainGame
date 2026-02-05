@@ -1,2 +1,123 @@
 <!-- TEST 20:09 -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Stick Runner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { margin:0; background:black; overflow:hidden; }
+  canvas { display:block; }
+</style>
+</head>
 
+<body>
+<canvas id="c"></canvas>
+
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+
+c.width = innerWidth;
+c.height = innerHeight;
+
+// ===== PLAYER =====
+const player = {
+  x: 120,
+  y: c.height - 120,
+  r: 12
+};
+
+// ===== OBSTACLES =====
+let obstacles = [];
+let speed = 4;
+
+// ===== CREATE OBSTACLE =====
+function spawnObstacle(){
+  obstacles.push({
+    x: c.width + 40,
+    y: player.y + 20,
+    w: 30,
+    h: 40
+  });
+}
+
+// ===== RESET =====
+function reset(){
+  obstacles = [];
+}
+
+// ===== DRAW STICK =====
+function drawStick(){
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+
+  // head
+  ctx.beginPath();
+  ctx.arc(player.x, player.y - 20, player.r, 0, Math.PI*2);
+  ctx.stroke();
+
+  // body
+  ctx.beginPath();
+  ctx.moveTo(player.x, player.y - 8);
+  ctx.lineTo(player.x, player.y + 30);
+  ctx.stroke();
+
+  // arms
+  ctx.beginPath();
+  ctx.moveTo(player.x - 12, player.y + 5);
+  ctx.lineTo(player.x + 12, player.y + 5);
+  ctx.stroke();
+
+  // legs
+  ctx.beginPath();
+  ctx.moveTo(player.x, player.y + 30);
+  ctx.lineTo(player.x - 10, player.y + 50);
+  ctx.moveTo(player.x, player.y + 30);
+  ctx.lineTo(player.x + 10, player.y + 50);
+  ctx.stroke();
+}
+
+// ===== GAME LOOP =====
+let frame = 0;
+function loop(){
+  ctx.clearRect(0,0,c.width,c.height);
+
+  // ground
+  ctx.strokeStyle="#333";
+  ctx.beginPath();
+  ctx.moveTo(0, player.y + 50);
+  ctx.lineTo(c.width, player.y + 50);
+  ctx.stroke();
+
+  // spawn obstacles
+  frame++;
+  if(frame % 90 === 0) spawnObstacle();
+
+  // move + draw obstacles
+  obstacles.forEach(o=>{
+    o.x -= speed;
+    ctx.fillStyle = "#666";
+    ctx.fillRect(o.x, o.y, o.w, o.h);
+
+    // collision
+    if(
+      player.x + 10 > o.x &&
+      player.x - 10 < o.x + o.w &&
+      player.y + 40 > o.y
+    ){
+      reset();
+    }
+  });
+
+  // remove old
+  obstacles = obstacles.filter(o => o.x > -50);
+
+  drawStick();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
