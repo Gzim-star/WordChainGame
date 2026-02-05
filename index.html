@@ -1,206 +1,157 @@
-<!-- TEST 18:25 -->
+<!-- TEST 20:09 -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>IQ Number Puzzle</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+<title>Stick Figure Trial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-  margin: 0;
-  background: black;
-  color: white;
-  font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-h1 { margin-bottom: 20px; }
-
-/* GRID */
-#grid {
-  display: grid;
-  grid-template-columns: repeat(12, min(24px, 6vw));
-  grid-template-rows: repeat(12, min(24px, 6vw));
-  gap: 9px;
-}
-
-.cell {
-  background: white;
-  border-radius: 10%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(12px + 0.6vmin);
-  font-weight: bold;
-  color: black;
-  user-select: none;
-}
-
-.cell.correct { background: #0f0; }
-.cell.wrong   { background: #f00; }
-
-#message {
-  margin-top: 12px;
-  font-size: 18px;
-  color: #0f0;
-}
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+  }
 </style>
 </head>
 
 <body>
-
-<h1>IQ</h1>
-<div id="grid"></div>
-<div id="message"></div>
+<canvas id="game"></canvas>
 
 <script>
-const grid = document.getElementById("grid");
-const message = document.getElementById("message");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-/* 🔢 ZAHLEN-ALPHABET */
-const alphabet = "0123456789";
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-/* 🧠 ZAHLEN-SEQUENZEN */
-const words = [
-  "0123",
-  "9876",
-  "1357",
-  "2468",
-  "019",
-  "908",
-  "12345",
-  "56789",
-  "808",
-  "404",
-  "369",
-  "7531",
-  "02468",
-  "97531",
-  "112233",
-  "90909",
-  "314",
-  "2718",
-  "1618"
+// ===== PLAYER =====
+const player = {
+  x: 100,
+  y: canvas.height - 150,
+  vx: 0,
+  vy: 0,
+  w: 20,
+  h: 60,
+  onGround: false
+};
+
+// ===== PHYSICS =====
+const gravity = 0.8;
+const speed = 4;
+const jump = -14;
+
+// ===== OBSTACLES =====
+const obstacles = [
+  { x: 300, y: canvas.height - 80, w: 120, h: 20 },
+  { x: 520, y: canvas.height - 140, w: 120, h: 20 },
+  { x: 760, y: canvas.height - 200, w: 120, h: 20 }
 ];
 
-let positions = [];
-let currentIndex = 0;
-let globalOrder = 0;
+// ===== INPUT =====
+const keys = {};
+window.addEventListener("keydown", e => keys[e.key] = true);
+window.addEventListener("keyup", e => keys[e.key] = false);
 
-/* GRID ERZEUGEN */
-function generateGrid() {
-  grid.innerHTML = "";
-  message.textContent = "";
-  currentIndex = 0;
-  positions = [];
-  globalOrder = 0;
-
-  const WORDS_PER_GRID = 6;
-  const selected = [];
-
-  while (selected.length < WORDS_PER_GRID) {
-    const w = words[Math.floor(Math.random() * words.length)];
-    if (!selected.includes(w)) selected.push(w);
-  }
-
-  const gridData = Array.from({ length: 12 }, () =>
-    Array.from({ length: 12 }, () => null)
-  );
-
-  selected.forEach(word => placeWord(word, gridData));
-
-  for (let r = 0; r < 12; r++) {
-    for (let c = 0; c < 12; c++) {
-      const div = document.createElement("div");
-      div.className = "cell";
-
-      if (gridData[r][c]) {
-        div.textContent = gridData[r][c].letter;
-        positions.push({ div, order: gridData[r][c].order });
-      } else {
-        div.textContent =
-          alphabet[Math.floor(Math.random() * alphabet.length)];
-      }
-
-      div.onclick = () => checkClick(div);
-      grid.appendChild(div);
-    }
-  }
-
-  positions.sort((a, b) => a.order - b.order);
+// ===== GAME LOOP =====
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
 }
 
-/* ZAHLEN-SEQUENZ PLATZIEREN */
-function placeWord(word, gridData) {
-  const len = word.length;
-  let placed = false;
+// ===== UPDATE =====
+function update() {
+  // Bewegung
+  if (keys["ArrowLeft"]) player.vx = -speed;
+  else if (keys["ArrowRight"]) player.vx = speed;
+  else player.vx = 0;
 
-  while (!placed) {
-    // 0 ➡️ | 1 ⬇️ | 2 ↘️ | 3 ↗️
-    const mode = Math.floor(Math.random() * 4);
+  if (keys[" "] && player.onGround) {
+    player.vy = jump;
+    player.onGround = false;
+  }
 
-    const maxRow = (mode === 0 || mode === 3) ? 12 : 12 - len;
-    const maxCol = (mode === 1 || mode === 2 || mode === 3) ? 12 - len : 12;
+  player.vy += gravity;
+  player.x += player.vx;
+  player.y += player.vy;
 
-    const sr = Math.floor(Math.random() * maxRow);
-    const sc = Math.floor(Math.random() * maxCol);
+  // Boden
+  if (player.y + player.h > canvas.height - 20) {
+    player.y = canvas.height - 20 - player.h;
+    player.vy = 0;
+    player.onGround = true;
+  }
 
-    let fits = true;
-    for (let i = 0; i < len; i++) {
-      let r = sr + (mode === 1 || mode === 2 ? i : 0);
-      let c = sc + (mode === 0 || mode === 2 ? i : 0);
-      if (mode === 3) { r = sr - i; c = sc + i; }
-
-      if (r < 0 || r >= 12 || c < 0 || c >= 12 || gridData[r][c]) {
-        fits = false;
-        break;
+  // Kollision Hindernisse
+  obstacles.forEach(o => {
+    if (
+      player.x < o.x + o.w &&
+      player.x + player.w > o.x &&
+      player.y < o.y + o.h &&
+      player.y + player.h > o.y
+    ) {
+      // von oben landen
+      if (player.vy > 0) {
+        player.y = o.y - player.h;
+        player.vy = 0;
+        player.onGround = true;
       }
     }
-
-    if (!fits) continue;
-
-    for (let i = 0; i < len; i++) {
-      let r = sr + (mode === 1 || mode === 2 ? i : 0);
-      let c = sc + (mode === 0 || mode === 2 ? i : 0);
-      if (mode === 3) { r = sr - i; c = sc + i; }
-
-      gridData[r][c] = {
-        letter: word[i],
-        order: globalOrder++
-      };
-    }
-
-    placed = true;
-  }
+  });
 }
 
-/* KLICK PRÜFEN */
-function checkClick(div) {
-  const expected = positions[currentIndex]?.div;
+// ===== DRAW =====
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  if (div === expected) {
-    div.classList.add("correct");
-    currentIndex++;
+  // Boden
+  ctx.fillStyle = "#222";
+  ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
 
-    if (currentIndex === positions.length) {
-      setTimeout(generateGrid, 1200);
-    }
-  } else {
-    div.classList.add("wrong");
-    setTimeout(() => div.classList.remove("wrong"), 700);
-  }
+  // Hindernisse
+  ctx.fillStyle = "#555";
+  obstacles.forEach(o => {
+    ctx.fillRect(o.x, o.y, o.w, o.h);
+  });
+
+  drawStickFigure(player.x, player.y);
 }
 
-generateGrid();
+// ===== STICK FIGURE =====
+function drawStickFigure(x, y) {
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 2;
+
+  // Kopf
+  ctx.beginPath();
+  ctx.arc(x + 10, y - 10, 10, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Körper
+  ctx.beginPath();
+  ctx.moveTo(x + 10, y);
+  ctx.lineTo(x + 10, y + 30);
+  ctx.stroke();
+
+  // Arme
+  ctx.beginPath();
+  ctx.moveTo(x - 5, y + 15);
+  ctx.lineTo(x + 25, y + 15);
+  ctx.stroke();
+
+  // Beine
+  ctx.beginPath();
+  ctx.moveTo(x + 10, y + 30);
+  ctx.lineTo(x - 5, y + 55);
+  ctx.moveTo(x + 10, y + 30);
+  ctx.lineTo(x + 25, y + 55);
+  ctx.stroke();
+}
+
+loop();
 </script>
-
 </body>
 </html>
