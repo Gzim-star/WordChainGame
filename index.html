@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Stick Runner</title>
+<title>Stick Jump</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body { margin:0; background:black; overflow:hidden; }
@@ -23,28 +23,48 @@ c.height = innerHeight;
 
 // ===== PLAYER =====
 const player = {
-  x: 120,
-  y: c.height - 120,
-  r: 12
+  x: 140,
+  y: 0,
+  baseY: c.height - 120,
+  vy: 0,
+  r: 12,
+  jumping: false
 };
 
 // ===== OBSTACLES =====
 let obstacles = [];
 let speed = 4;
+let gravity = 0.7;
+let jumpPower = -14;
 
-// ===== CREATE OBSTACLE =====
-function spawnObstacle(){
-  obstacles.push({
-    x: c.width + 40,
-    y: player.y + 20,
-    w: 30,
-    h: 40
-  });
+// ===== INPUT =====
+addEventListener("keydown", e => {
+  if(e.code === "Space") jump();
+});
+addEventListener("touchstart", jump);
+
+function jump(){
+  if(!player.jumping){
+    player.vy = jumpPower;
+    player.jumping = true;
+  }
 }
 
 // ===== RESET =====
 function reset(){
   obstacles = [];
+  player.y = player.baseY;
+  player.vy = 0;
+  player.jumping = false;
+}
+
+// ===== SPAWN OBSTACLE =====
+function spawnObstacle(){
+  obstacles.push({
+    x: c.width + 40,
+    y: player.baseY + 25,
+    r: 16
+  });
 }
 
 // ===== DRAW STICK =====
@@ -78,7 +98,7 @@ function drawStick(){
   ctx.stroke();
 }
 
-// ===== GAME LOOP =====
+// ===== LOOP =====
 let frame = 0;
 function loop(){
   ctx.clearRect(0,0,c.width,c.height);
@@ -86,37 +106,50 @@ function loop(){
   // ground
   ctx.strokeStyle="#333";
   ctx.beginPath();
-  ctx.moveTo(0, player.y + 50);
-  ctx.lineTo(c.width, player.y + 50);
+  ctx.moveTo(0, player.baseY + 50);
+  ctx.lineTo(c.width, player.baseY + 50);
   ctx.stroke();
+
+  // gravity
+  player.vy += gravity;
+  player.y += player.vy;
+
+  if(player.y >= player.baseY){
+    player.y = player.baseY;
+    player.vy = 0;
+    player.jumping = false;
+  }
 
   // spawn obstacles
   frame++;
-  if(frame % 90 === 0) spawnObstacle();
+  if(frame % 100 === 0) spawnObstacle();
 
   // move + draw obstacles
   obstacles.forEach(o=>{
     o.x -= speed;
-    ctx.fillStyle = "#666";
-    ctx.fillRect(o.x, o.y, o.w, o.h);
 
-    // collision
-    if(
-      player.x + 10 > o.x &&
-      player.x - 10 < o.x + o.w &&
-      player.y + 40 > o.y
-    ){
+    ctx.fillStyle = "#666";
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+    ctx.fill();
+
+    // collision (circle vs body)
+    const dx = player.x - o.x;
+    const dy = (player.y + 25) - o.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    if(dist < o.r + 15){
       reset();
     }
   });
 
-  // remove old
   obstacles = obstacles.filter(o => o.x > -50);
 
   drawStick();
   requestAnimationFrame(loop);
 }
 
+reset();
 loop();
 </script>
 </body>
