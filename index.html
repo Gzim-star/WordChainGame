@@ -1,2 +1,92 @@
-<!-- TEST 20:09 -->
+<!-- TEST 13:10 -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>IQ Triangle Puzzle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
 
+#grid {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 12px;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 52px solid white;
+  cursor: pointer;
+  transform-origin: center;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+.triangle.correct {
+  opacity: 0.3;
+}
+</style>
+</head>
+
+<body>
+
+<div id="grid"></div>
+
+<script>
+const grid = document.getElementById("grid");
+const SIZE = 5;
+let triangles = [];
+
+function createGrid() {
+  grid.innerHTML = "";
+  triangles = [];
+
+  for (let i = 0; i < SIZE * SIZE; i++) {
+    const div = document.createElement("div");
+    div.className = "triangle";
+
+    const rotation = Math.floor(Math.random() * 4) * 90;
+    div.dataset.rot = rotation;
+    div.style.transform = `rotate(${rotation}deg)`;
+
+    div.onclick = () => rotateTriangle(div);
+
+    triangles.push(div);
+    grid.appendChild(div);
+  }
+}
+
+function rotateTriangle(el) {
+  let rot = parseInt(el.dataset.rot);
+  rot = (rot + 90) % 360;
+  el.dataset.rot = rot;
+  el.style.transform = `rotate(${rot}deg)`;
+
+  checkWin();
+}
+
+function checkWin() {
+  const solved = triangles.every(t => parseInt(t.dataset.rot) === 0);
+
+  if (solved) {
+    triangles.forEach(t => t.classList.add("correct"));
+    setTimeout(createGrid, 1200);
+  }
+}
+
+createGrid();
+</script>
+
+</body>
+</html>
