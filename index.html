@@ -23,7 +23,6 @@ canvas {
   border: 2px solid #444;
 }
 
-/* Spiel-Bar */
 .controls {
   margin-top: 10px;
   display: flex;
@@ -32,7 +31,7 @@ canvas {
 
 .controls button {
   background: #222;
-  color: #0ff;
+  color: #fff;
   border: 1px solid #444;
   padding: 12px 16px;
   font-size: 18px;
@@ -45,7 +44,6 @@ canvas {
 
 <canvas id="tetris" width="200" height="400"></canvas>
 
-<!-- Spiel Bar -->
 <div class="controls">
   <button onclick="move(-1)">◀</button>
   <button onclick="rotatePlayer()">⟳</button>
@@ -58,32 +56,58 @@ const canvas = document.getElementById('tetris');
 const ctx = canvas.getContext('2d');
 ctx.scale(20, 20);
 
-const arena = Array.from({length: 20}, () => Array(10).fill(0));
+/* Farben */
+const colors = [
+  null,
+  '#00f0f0', // I
+  '#0000f0', // J
+  '#f0a000', // L
+  '#f0f000', // O
+  '#00f000', // S
+  '#a000f0', // T
+  '#f00000'  // Z
+];
+
+const arena = Array.from({ length: 20 }, () => Array(10).fill(0));
 
 const pieces = {
-  T:[[0,1,0],[1,1,1],[0,0,0]],
-  O:[[1,1],[1,1]],
-  L:[[0,0,1],[1,1,1],[0,0,0]],
-  J:[[1,0,0],[1,1,1],[0,0,0]],
-  I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-  S:[[0,1,1],[1,1,0],[0,0,0]],
-  Z:[[1,1,0],[0,1,1],[0,0,0]]
+  I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  J: [[1,0,0],[1,1,1],[0,0,0]],
+  L: [[0,0,1],[1,1,1],[0,0,0]],
+  O: [[1,1],[1,1]],
+  S: [[0,1,1],[1,1,0],[0,0,0]],
+  T: [[0,1,0],[1,1,1],[0,0,0]],
+  Z: [[1,1,0],[0,1,1],[0,0,0]]
 };
 
 const player = {
-  pos: {x: 0, y: 0},
-  matrix: null
+  pos: { x: 0, y: 0 },
+  matrix: null,
+  type: null
 };
+
+/* ===== Logik ===== */
 
 function collide(arena, player) {
   const m = player.matrix;
   const o = player.pos;
+
   for (let y = 0; y < m.length; y++) {
     for (let x = 0; x < m[y].length; x++) {
-      if (m[y][x] !== 0 &&
-         (arena[y + o.y] &&
-          arena[y + o.y][x + o.x]) !== 0) {
-        return true;
+      if (m[y][x] !== 0) {
+        const ay = y + o.y;
+        const ax = x + o.x;
+
+        if (ay < 0) continue;
+
+        if (
+          ay >= arena.length ||
+          ax < 0 ||
+          ax >= arena[0].length ||
+          arena[ay][ax] !== 0
+        ) {
+          return true;
+        }
       }
     }
   }
@@ -94,7 +118,7 @@ function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((v, x) => {
       if (v !== 0) {
-        arena[y + player.pos.y][x + player.pos.x] = 1;
+        arena[y + player.pos.y][x + player.pos.x] = colors.indexOf(player.color);
       }
     });
   });
@@ -110,16 +134,23 @@ function rotate(matrix) {
 
 function move(dir) {
   player.pos.x += dir;
-  if (collide(arena, player)) {
-    player.pos.x -= dir;
-  }
+  if (collide(arena, player)) player.pos.x -= dir;
 }
 
 function rotatePlayer() {
   const old = player.matrix;
+  const oldX = player.pos.x;
   player.matrix = rotate(player.matrix);
-  if (collide(arena, player)) {
-    player.matrix = old;
+
+  let offset = 1;
+  while (collide(arena, player)) {
+    player.pos.x += offset;
+    offset = -(offset + (offset > 0 ? 1 : -1));
+    if (Math.abs(offset) > player.matrix[0].length) {
+      player.matrix = old;
+      player.pos.x = oldX;
+      return;
+    }
   }
 }
 
@@ -145,9 +176,11 @@ function sweep() {
 }
 
 function resetPlayer() {
-  const types = 'TJLOSZI';
-  player.matrix = pieces[types[Math.random()*types.length|0]];
-  player.pos.y = 0;
+  const types = 'IJLOSTZ';
+  player.type = types[Math.random() * types.length | 0];
+  player.matrix = pieces[player.type];
+  player.color = colors[types.indexOf(player.type) + 1];
+  player.pos.y = -1;
   player.pos.x = (arena[0].length / 2 | 0) -
                  (player.matrix[0].length / 2 | 0);
 
@@ -158,11 +191,11 @@ function resetPlayer() {
 
 /* ===== Zeichnen ===== */
 
-function drawMatrix(matrix, offset) {
+function drawMatrix(matrix, offset, color) {
   matrix.forEach((row, y) => {
     row.forEach((v, x) => {
       if (v !== 0) {
-        ctx.fillStyle = '#0ff';
+        ctx.fillStyle = color;
         ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
       }
     });
@@ -172,8 +205,17 @@ function drawMatrix(matrix, offset) {
 function draw() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawMatrix(arena, {x:0,y:0});
-  drawMatrix(player.matrix, player.pos);
+
+  arena.forEach((row, y) => {
+    row.forEach((v, x) => {
+      if (v !== 0) {
+        ctx.fillStyle = colors[v];
+        ctx.fillRect(x, y, 1, 1);
+      }
+    });
+  });
+
+  drawMatrix(player.matrix, player.pos, player.color);
 }
 
 /* ===== Loop ===== */
