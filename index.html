@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Triangle Puzzle Step Solution</title>
+<title>Hard Triangle Puzzle</title>
 <style>
 body {
   margin: 0;
@@ -11,53 +11,54 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: black;
+  background: #111;
   flex-direction: column;
   font-family: Arial, sans-serif;
 }
 
 #puzzle {
   display: grid;
-  grid-template-columns: repeat(4, 60px);
-  grid-gap: 6px;
-  margin-bottom: 40px; /* Mehr Abstand für Button */
+  grid-template-columns: repeat(4, 70px);
+  grid-gap: 8px;
+  margin-bottom: 50px; /* Platz für Button */
 }
 
 /* Dreieck */
 .triangle {
   width: 0;
   height: 0;
-  border-left: 30px solid transparent;
-  border-right: 30px solid transparent;
-  border-bottom: 52px solid white;
+  border-left: 35px solid transparent;
+  border-right: 35px solid transparent;
+  border-bottom: 60px solid white;
   cursor: pointer;
   transform-origin: center bottom;
-  transition: transform 0.3s;
+  transition: transform 0.4s;
   position: relative;
   display: flex;
-  align-items: flex-end; /* Nummer unten im Dreieck */
+  align-items: center;
   justify-content: center;
 }
 
-/* Nummer im Dreieck */
+/* Nummer innerhalb Dreieck */
 .triangle span {
+  position: absolute;
+  bottom: 12px; /* leicht nach oben */
   color: yellow;
-  font-size: 16px;
   font-weight: bold;
-  position: relative;
-  bottom: 8px; /* leicht nach oben innerhalb des Dreiecks */
+  font-size: 18px;
+  pointer-events: none;
 }
 
 /* Grün wenn korrekt */
 .correct {
-  border-bottom-color: limegreen;
+  border-bottom-color: limegreen !important;
 }
 
 #solutionBtn {
   background: rgba(255,255,255,0.85);
   color: black;
   border: none;
-  padding: 10px 18px;
+  padding: 12px 20px;
   font-size: 16px;
   cursor: pointer;
   border-radius: 6px;
@@ -80,39 +81,37 @@ const cols = 4;
 const puzzle = document.getElementById('puzzle');
 let triangles = [];
 
-// Schritt-Reihenfolge (0 = zuerst, 1 = danach, ...)
-let solutionSteps = [];
-
 // Erstelle Dreiecke
 for (let i = 0; i < rows*cols; i++) {
   const tri = document.createElement('div');
   tri.classList.add('triangle');
-  tri.rotation = [0,90,180,270][Math.floor(Math.random()*4)];
+
+  // Zufällige Rotation zwischen 0 und 360 Grad in 15° Schritten
+  let randomRotation = Math.floor(Math.random()*24)*15; 
+  tri.rotation = randomRotation;
   tri.style.transform = `rotate(${tri.rotation}deg)`;
 
+  // Nummer direkt INSIDE
   const num = document.createElement('span');
-  num.innerText = i+1; // Nummer für Lösungs-Hinweis
+  num.innerText = i+1;
   tri.appendChild(num);
 
   puzzle.appendChild(tri);
   triangles.push(tri);
-  solutionSteps.push(tri); // Reihenfolge für Lösung
+}
 
+// Dreieck drehen bei Klick
+triangles.forEach(tri => {
   tri.addEventListener('click', () => {
-    rotateTriangle(tri);
+    tri.rotation = (tri.rotation + 90) % 360;
+    tri.style.transform = `rotate(${tri.rotation}deg)`;
     checkWin();
   });
-}
+});
 
-// Dreieck drehen
-function rotateTriangle(tri) {
-  tri.rotation = (tri.rotation + 90) % 360;
-  tri.style.transform = `rotate(${tri.rotation}deg)`;
-}
-
-// Prüfen ob alles korrekt
+// Prüfen ob korrekt
 function checkWin() {
-  if (triangles.every(t => t.rotation === 0)) {
+  if (triangles.every(t => t.rotation % 360 === 0)) {
     triangles.forEach(t => t.classList.add('correct'));
     setTimeout(() => alert('Puzzle solved! 🎉'), 100);
   } else {
@@ -120,20 +119,22 @@ function checkWin() {
   }
 }
 
-// Lösung Schritt für Schritt
+// Lösung Schritt für Schritt (nach Nummern)
 let currentStep = 0;
 document.getElementById('solutionBtn').addEventListener('click', () => {
-  if (currentStep < solutionSteps.length) {
-    const tri = solutionSteps[currentStep];
-    // Markiere das Dreieck temporär für 1 Sekunde
+  if (currentStep < triangles.length) {
+    const tri = triangles[currentStep];
+    // Pulsieren + orange markieren
     tri.style.borderBottomColor = 'orange';
+    tri.style.transform += ' scale(1.2)';
     setTimeout(() => {
       tri.style.borderBottomColor = 'white';
+      tri.style.transform = `rotate(${tri.rotation}deg)`;
     }, 1000);
     currentStep++;
   } else {
     alert('All steps shown!');
-    currentStep = 0; // zurücksetzen
+    currentStep = 0;
   }
 });
 </script>
