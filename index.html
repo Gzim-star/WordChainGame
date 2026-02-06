@@ -1,2 +1,138 @@
 <!-- TEST 13:10 -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Flow Puzzle Animiert</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#111;
+  font-family:sans-serif;
+}
 
+.container {
+  text-align:center;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(6,60px);
+  grid-template-rows:repeat(6,60px);
+  gap:5px;
+  margin-bottom:20px;
+}
+
+.cell {
+  background:#eee;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:30px;
+  cursor:pointer;
+  border-radius:8px;
+  transition: transform 0.3s, background 0.3s;
+  user-select:none;
+}
+
+.cell.correct {
+  background:#4caf50;
+  color:#fff;
+}
+
+.cell.wrong {
+  background:#f44336;
+  color:#fff;
+}
+
+#solutionBtn {
+  padding:10px 20px;
+  font-size:16px;
+  cursor:pointer;
+  background:#fff;
+  color:#000;
+  border:none;
+  border-radius:5px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="grid" id="grid"></div>
+  <button id="solutionBtn">Lösung anzeigen</button>
+</div>
+
+<script>
+// ===== Puzzle Setup =====
+const gridEl = document.getElementById("grid");
+const size = 6;
+let solution = [];
+let solutionShown = false;
+const arrows = ["↑","→","↓","←"]; // Reihenfolge für Drehungen
+const cells = [];
+
+// Grid erstellen & zufällige Pfeile
+for(let r=0;r<size;r++){
+  solution[r] = [];
+  for(let c=0;c<size;c++){
+    const cell = document.createElement("div");
+    cell.className="cell";
+    cell.dataset.row = r;
+    cell.dataset.col = c;
+
+    // Lösung speichern
+    const arrow = arrows[Math.floor(Math.random()*arrows.length)];
+    solution[r][c] = arrow;
+
+    // zufälliger Startwert (falsch)
+    const randArrow = arrows[Math.floor(Math.random()*arrows.length)];
+    cell.textContent = randArrow;
+    cell.dataset.index = arrows.indexOf(randArrow); // aktueller Winkel
+    cell.dataset.solution = arrows.indexOf(arrow); // Zielwinkel
+
+    // Klick auf Zelle
+    cell.onclick = ()=>{
+      if(solutionShown) return; // nicht mehr klickbar nach Lösung
+      let current = parseInt(cell.dataset.index);
+      current = (current + 1) % arrows.length; // Drehung
+      cell.dataset.index = current;
+      cell.textContent = arrows[current];
+
+      // Prüfen
+      if(current === parseInt(cell.dataset.solution)){
+        cell.classList.add("correct");
+      } else {
+        cell.classList.remove("correct");
+        cell.classList.add("wrong");
+        setTimeout(()=>cell.classList.remove("wrong"),300);
+      }
+    };
+
+    gridEl.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+// ===== Lösungsbutton =====
+const solutionBtn = document.getElementById("solutionBtn");
+solutionBtn.onclick = ()=>{
+  if(solutionShown) return;
+  solutionShown = true;
+
+  cells.forEach(cell=>{
+    const target = parseInt(cell.dataset.solution);
+    cell.dataset.index = target;
+    cell.textContent = arrows[target];
+    cell.classList.add("correct");
+  });
+
+  solutionBtn.style.opacity = 0.5;
+  solutionBtn.style.cursor = "default";
+};
+</script>
+</body>
+</html>
