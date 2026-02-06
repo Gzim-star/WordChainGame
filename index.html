@@ -1,2 +1,224 @@
 <!-- TEST 13:10 -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Tetris</title>
+<style>
+  body {
+    background: #111;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  #tetris {
+    position: relative;
+    width: 240px;
+    height: 480px;
+    background: #222;
+    border: 2px solid #555;
+    display: grid;
+    grid-template-columns: repeat(10, 24px);
+    grid-template-rows: repeat(20, 24px);
+    gap: 1px;
+  }
+  .cell {
+    width: 24px;
+    height: 24px;
+    background: #111;
+    border: 1px solid #222;
+  }
+  .filled {
+    border: 1px solid #333;
+  }
+</style>
+</head>
+<body>
 
+<div id="tetris"></div>
+
+<script>
+const tetris = document.getElementById('tetris');
+const width = 10;
+const height = 20;
+let cells = [];
+let timerId;
+
+let currentPosition = 4;
+let currentRotation = 0;
+
+// Tetrominos
+const tetrominoes = [
+  // I
+  [
+    [1, width+1, width*2+1, width*3+1],
+    [width, width+1, width+2, width+3],
+    [1, width+1, width*2+1, width*3+1],
+    [width, width+1, width+2, width+3]
+  ],
+  // O
+  [
+    [0,1,width,width+1],
+    [0,1,width,width+1],
+    [0,1,width,width+1],
+    [0,1,width,width+1]
+  ],
+  // T
+  [
+    [1,width,width+1,width+2],
+    [1,width+1,width+2,width*2+1],
+    [width,width+1,width+2,width*2+1],
+    [1,width,width+1,width*2+1]
+  ],
+  // S
+  [
+    [1,2,width,width+1],
+    [0,width,width+1,width*2+1],
+    [1,2,width,width+1],
+    [0,width,width+1,width*2+1]
+  ],
+  // Z
+  [
+    [0,1,width+1,width+2],
+    [1,width,width+1,width*2],
+    [0,1,width+1,width+2],
+    [1,width,width+1,width*2]
+  ],
+  // J
+  [
+    [0,width+0,width+1,width+2],
+    [1,width+1,width*2+1,width*2+0],
+    [width,width+1,width+2,width*2+2],
+    [1,2,width+1,width*2+1]
+  ],
+  // L
+  [
+    [2,width,width+1,width+2],
+    [1,width+1,width*2+1,width*2+2],
+    [width,width+1,width+2,0],
+    [0,1,width+0,width*2+0]
+  ]
+];
+
+const colors = ['#00f0f0','#f0f000','#a000f0','#0f0','#f00','#0ff','#f90'];
+
+let random = Math.floor(Math.random() * tetrominoes.length);
+let current = tetrominoes[random][currentRotation];
+
+// GRID erstellen
+for(let i=0; i<width*height; i++){
+  const div = document.createElement('div');
+  div.classList.add('cell');
+  tetris.appendChild(div);
+  cells.push(div);
+}
+
+// Zeichnen
+function draw() {
+  current.forEach(index => {
+    cells[currentPosition + index].style.backgroundColor = colors[random];
+    cells[currentPosition + index].classList.add('filled');
+  });
+}
+
+// Löschen
+function undraw() {
+  current.forEach(index => {
+    cells[currentPosition + index].style.backgroundColor = '#111';
+    cells[currentPosition + index].classList.remove('filled');
+  });
+}
+
+// Bewegung nach unten
+function moveDown() {
+  undraw();
+  currentPosition += width;
+  draw();
+  freeze();
+}
+
+// Einfrieren, wenn unten
+function freeze() {
+  if(current.some(index => cells[currentPosition + index + width]?.classList.contains('taken'))) {
+    current.forEach(index => cells[currentPosition + index].classList.add('taken'));
+    // neues Tetromino
+    random = Math.floor(Math.random() * tetrominoes.length);
+    current = tetrominoes[random][currentRotation = 0];
+    currentPosition = 4;
+    draw();
+    addScore();
+    gameOver();
+  }
+}
+
+// Links/Rechts
+function moveLeft() {
+  undraw();
+  const isAtLeftEdge = current.some(index => (currentPosition + index) % width === 0);
+  if(!isAtLeftEdge) currentPosition -=1;
+  if(current.some(index => cells[currentPosition + index].classList.contains('taken'))) currentPosition +=1;
+  draw();
+}
+function moveRight() {
+  undraw();
+  const isAtRightEdge = current.some(index => (currentPosition + index) % width === width-1);
+  if(!isAtRightEdge) currentPosition +=1;
+  if(current.some(index => cells[currentPosition + index].classList.contains('taken'))) currentPosition -=1;
+  draw();
+}
+
+// Rotation
+function rotate() {
+  undraw();
+  currentRotation++;
+  if(currentRotation === current.length) currentRotation = 0;
+  current = tetrominoes[random][currentRotation];
+  draw();
+}
+
+// Steuerung
+document.addEventListener('keydown', control);
+function control(e) {
+  if(e.keyCode === 37) moveLeft();
+  else if(e.keyCode === 39) moveRight();
+  else if(e.keyCode === 38) rotate();
+  else if(e.keyCode === 40) moveDown();
+}
+
+// Score
+let score = 0;
+function addScore() {
+  for(let i=0; i<height; i++) {
+    const row = Array.from({length: width}, (_,k) => k + i*width);
+    if(row.every(index => cells[index].classList.contains('taken'))) {
+      score += 10;
+      row.forEach(index => {
+        cells[index].classList.remove('taken','filled');
+        cells[index].style.backgroundColor = '#111';
+      });
+      const removed = cells.splice(i*width, width);
+      cells = removed.concat(cells);
+      cells.forEach(div => tetris.appendChild(div));
+    }
+  }
+}
+
+// Game Over
+function gameOver() {
+  if(current.some(index => cells[currentPosition + index].classList.contains('taken'))) {
+    clearInterval(timerId);
+    alert('Game Over! Dein Score: ' + score);
+  }
+}
+
+// Start Tetris sofort
+draw();
+timerId = setInterval(moveDown, 500);
+
+</script>
+</body>
+</html>
