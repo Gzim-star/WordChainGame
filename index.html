@@ -20,9 +20,10 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 60px);
   grid-gap: 6px;
-  margin-bottom: 20px;
+  margin-bottom: 40px; /* Mehr Abstand für Button */
 }
 
+/* Dreieck */
 .triangle {
   width: 0;
   height: 0;
@@ -33,17 +34,18 @@ body {
   transform-origin: center bottom;
   transition: transform 0.3s;
   position: relative;
+  display: flex;
+  align-items: flex-end; /* Nummer unten im Dreieck */
+  justify-content: center;
 }
 
-/* Nummer in Dreieck */
+/* Nummer im Dreieck */
 .triangle span {
-  position: absolute;
-  top: -35px;
-  left: 50%;
-  transform: translateX(-50%);
   color: yellow;
   font-size: 16px;
   font-weight: bold;
+  position: relative;
+  bottom: 8px; /* leicht nach oben innerhalb des Dreiecks */
 }
 
 /* Grün wenn korrekt */
@@ -55,7 +57,7 @@ body {
   background: rgba(255,255,255,0.85);
   color: black;
   border: none;
-  padding: 8px 14px;
+  padding: 10px 18px;
   font-size: 16px;
   cursor: pointer;
   border-radius: 6px;
