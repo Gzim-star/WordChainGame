@@ -3,19 +3,31 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Tetris</title>
 
 <style>
 body {
   margin: 0;
   background: #111;
-  color: #eee;
+  height: 100vh;
+  overflow: hidden;
+  touch-action: none;
+  font-family: system-ui, sans-serif;
+}
+
+/* Alles fix in der Mitte */
+.game {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
-  font-family: system-ui, sans-serif;
 }
 
 canvas {
@@ -23,6 +35,7 @@ canvas {
   border: 2px solid #444;
 }
 
+/* Spiel-Bar */
 .controls {
   margin-top: 10px;
   display: flex;
@@ -42,13 +55,15 @@ canvas {
 
 <body>
 
-<canvas id="tetris" width="200" height="400"></canvas>
+<div class="game">
+  <canvas id="tetris" width="200" height="400"></canvas>
 
-<div class="controls">
-  <button onclick="move(-1)">◀</button>
-  <button onclick="rotatePlayer()">⟳</button>
-  <button onclick="move(1)">▶</button>
-  <button onclick="drop()">▼</button>
+  <div class="controls">
+    <button onclick="move(-1)">◀</button>
+    <button onclick="rotatePlayer()">⟳</button>
+    <button onclick="move(1)">▶</button>
+    <button onclick="drop()">▼</button>
+  </div>
 </div>
 
 <script>
@@ -83,7 +98,7 @@ const pieces = {
 const player = {
   pos: { x: 0, y: 0 },
   matrix: null,
-  type: null
+  color: null
 };
 
 /* ===== Logik ===== */
@@ -105,9 +120,7 @@ function collide(arena, player) {
           ax < 0 ||
           ax >= arena[0].length ||
           arena[ay][ax] !== 0
-        ) {
-          return true;
-        }
+        ) return true;
       }
     }
   }
@@ -118,7 +131,8 @@ function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((v, x) => {
       if (v !== 0) {
-        arena[y + player.pos.y][x + player.pos.x] = colors.indexOf(player.color);
+        arena[y + player.pos.y][x + player.pos.x] =
+          colors.indexOf(player.color);
       }
     });
   });
@@ -177,12 +191,13 @@ function sweep() {
 
 function resetPlayer() {
   const types = 'IJLOSTZ';
-  player.type = types[Math.random() * types.length | 0];
-  player.matrix = pieces[player.type];
-  player.color = colors[types.indexOf(player.type) + 1];
+  const type = types[Math.random() * types.length | 0];
+  player.matrix = pieces[type];
+  player.color = colors[types.indexOf(type) + 1];
   player.pos.y = -1;
-  player.pos.x = (arena[0].length / 2 | 0) -
-                 (player.matrix[0].length / 2 | 0);
+  player.pos.x =
+    (arena[0].length / 2 | 0) -
+    (player.matrix[0].length / 2 | 0);
 
   if (collide(arena, player)) {
     arena.forEach(row => row.fill(0));
@@ -190,17 +205,6 @@ function resetPlayer() {
 }
 
 /* ===== Zeichnen ===== */
-
-function drawMatrix(matrix, offset, color) {
-  matrix.forEach((row, y) => {
-    row.forEach((v, x) => {
-      if (v !== 0) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
-      }
-    });
-  });
-}
 
 function draw() {
   ctx.fillStyle = '#000';
@@ -215,7 +219,18 @@ function draw() {
     });
   });
 
-  drawMatrix(player.matrix, player.pos, player.color);
+  player.matrix.forEach((row, y) => {
+    row.forEach((v, x) => {
+      if (v !== 0) {
+        ctx.fillStyle = player.color;
+        ctx.fillRect(
+          x + player.pos.x,
+          y + player.pos.y,
+          1, 1
+        );
+      }
+    });
+  });
 }
 
 /* ===== Loop ===== */
