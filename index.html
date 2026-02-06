@@ -19,8 +19,8 @@ body {
 #puzzle {
   display: grid;
   grid-template-columns: repeat(4, 70px);
-  grid-gap: 8px;
-  margin-bottom: 50px; /* Platz für Button */
+  grid-gap: 10px;
+  margin-bottom: 60px; /* Platz für Button */
 }
 
 /* Dreieck */
@@ -32,24 +32,23 @@ body {
   border-bottom: 60px solid white;
   cursor: pointer;
   transform-origin: center bottom;
-  transition: transform 0.4s;
+  transition: transform 0.3s;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Nummer innerhalb Dreieck */
+/* Nummer INSIDE Dreieck */
 .triangle span {
   position: absolute;
-  bottom: 12px; /* leicht nach oben */
+  bottom: 10px; /* leicht nach oben */
   color: yellow;
   font-weight: bold;
   font-size: 18px;
   pointer-events: none;
 }
 
-/* Grün wenn korrekt */
 .correct {
   border-bottom-color: limegreen !important;
 }
@@ -86,12 +85,12 @@ for (let i = 0; i < rows*cols; i++) {
   const tri = document.createElement('div');
   tri.classList.add('triangle');
 
-  // Zufällige Rotation zwischen 0 und 360 Grad in 15° Schritten
-  let randomRotation = Math.floor(Math.random()*24)*15; 
+  // Zufällige Startrotation in 45°-Schritten
+  let randomRotation = Math.floor(Math.random()*8)*45; 
   tri.rotation = randomRotation;
   tri.style.transform = `rotate(${tri.rotation}deg)`;
 
-  // Nummer direkt INSIDE
+  // Nummer INSIDE Dreieck
   const num = document.createElement('span');
   num.innerText = i+1;
   tri.appendChild(num);
@@ -103,13 +102,15 @@ for (let i = 0; i < rows*cols; i++) {
 // Dreieck drehen bei Klick
 triangles.forEach(tri => {
   tri.addEventListener('click', () => {
-    tri.rotation = (tri.rotation + 90) % 360;
+    // Zufällige Drehung 45° oder 90° pro Klick
+    let randomStep = Math.random() < 0.5 ? 45 : 90;
+    tri.rotation = (tri.rotation + randomStep) % 360;
     tri.style.transform = `rotate(${tri.rotation}deg)`;
     checkWin();
   });
 });
 
-// Prüfen ob korrekt
+// Prüfen ob alle korrekt (Rotation 0°)
 function checkWin() {
   if (triangles.every(t => t.rotation % 360 === 0)) {
     triangles.forEach(t => t.classList.add('correct'));
@@ -119,14 +120,14 @@ function checkWin() {
   }
 }
 
-// Lösung Schritt für Schritt (nach Nummern)
+// Lösung Schritt-für-Schritt Button
 let currentStep = 0;
 document.getElementById('solutionBtn').addEventListener('click', () => {
   if (currentStep < triangles.length) {
     const tri = triangles[currentStep];
     // Pulsieren + orange markieren
     tri.style.borderBottomColor = 'orange';
-    tri.style.transform += ' scale(1.2)';
+    tri.style.transform = `rotate(${tri.rotation}deg) scale(1.2)`;
     setTimeout(() => {
       tri.style.borderBottomColor = 'white';
       tri.style.transform = `rotate(${tri.rotation}deg)`;
