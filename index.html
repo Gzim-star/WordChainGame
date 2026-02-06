@@ -4,26 +4,54 @@
 <head>
 <meta charset="UTF-8">
 <title>Tetris</title>
+
 <style>
-  body {
-    margin: 0;
-    background: #111;
-    color: #eee;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: system-ui, sans-serif;
-  }
-  canvas {
-    background: #000;
-    border: 2px solid #444;
-  }
+body {
+  margin: 0;
+  background: #111;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: system-ui, sans-serif;
+}
+
+canvas {
+  background: #000;
+  border: 2px solid #444;
+}
+
+/* Spiel-Bar */
+.controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.controls button {
+  background: #222;
+  color: #0ff;
+  border: 1px solid #444;
+  padding: 12px 16px;
+  font-size: 18px;
+  border-radius: 6px;
+}
 </style>
 </head>
+
 <body>
 
 <canvas id="tetris" width="200" height="400"></canvas>
+
+<!-- Spiel Bar -->
+<div class="controls">
+  <button onclick="move(-1)">◀</button>
+  <button onclick="rotatePlayer()">⟳</button>
+  <button onclick="move(1)">▶</button>
+  <button onclick="drop()">▼</button>
+</div>
 
 <script>
 const canvas = document.getElementById('tetris');
@@ -33,46 +61,14 @@ ctx.scale(20, 20);
 const arena = Array.from({length: 20}, () => Array(10).fill(0));
 
 const pieces = {
-  T: [
-    [0,1,0],
-    [1,1,1],
-    [0,0,0]
-  ],
-  O: [
-    [1,1],
-    [1,1]
-  ],
-  L: [
-    [0,0,1],
-    [1,1,1],
-    [0,0,0]
-  ],
-  J: [
-    [1,0,0],
-    [1,1,1],
-    [0,0,0]
-  ],
-  I: [
-    [0,0,0,0],
-    [1,1,1,1],
-    [0,0,0,0],
-    [0,0,0,0]
-  ],
-  S: [
-    [0,1,1],
-    [1,1,0],
-    [0,0,0]
-  ],
-  Z: [
-    [1,1,0],
-    [0,1,1],
-    [0,0,0]
-  ]
+  T:[[0,1,0],[1,1,1],[0,0,0]],
+  O:[[1,1],[1,1]],
+  L:[[0,0,1],[1,1,1],[0,0,0]],
+  J:[[1,0,0],[1,1,1],[0,0,0]],
+  I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  S:[[0,1,1],[1,1,0],[0,0,0]],
+  Z:[[1,1,0],[0,1,1],[0,0,0]]
 };
-
-function createPiece(type) {
-  return pieces[type];
-}
 
 const player = {
   pos: {x: 0, y: 0},
@@ -96,8 +92,8 @@ function collide(arena, player) {
 
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
+    row.forEach((v, x) => {
+      if (v !== 0) {
         arena[y + player.pos.y][x + player.pos.x] = 1;
       }
     });
@@ -110,26 +106,36 @@ function rotate(matrix) {
   );
 }
 
-function playerRotate() {
-  const rotated = rotate(player.matrix);
+/* ===== Steuerung ===== */
+
+function move(dir) {
+  player.pos.x += dir;
+  if (collide(arena, player)) {
+    player.pos.x -= dir;
+  }
+}
+
+function rotatePlayer() {
   const old = player.matrix;
-  player.matrix = rotated;
+  player.matrix = rotate(player.matrix);
   if (collide(arena, player)) {
     player.matrix = old;
   }
 }
 
-function playerDrop() {
+function drop() {
   player.pos.y++;
   if (collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
-    playerReset();
-    arenaSweep();
+    resetPlayer();
+    sweep();
   }
 }
 
-function arenaSweep() {
+/* ===== Arena ===== */
+
+function sweep() {
   for (let y = arena.length - 1; y >= 0; y--) {
     if (arena[y].every(v => v !== 0)) {
       arena.splice(y, 1);
@@ -138,25 +144,26 @@ function arenaSweep() {
   }
 }
 
-function playerReset() {
+function resetPlayer() {
   const types = 'TJLOSZI';
-  player.matrix = createPiece(types[Math.random() * types.length | 0]);
+  player.matrix = pieces[types[Math.random()*types.length|0]];
   player.pos.y = 0;
   player.pos.x = (arena[0].length / 2 | 0) -
                  (player.matrix[0].length / 2 | 0);
+
   if (collide(arena, player)) {
     arena.forEach(row => row.fill(0));
   }
 }
 
+/* ===== Zeichnen ===== */
+
 function drawMatrix(matrix, offset) {
   matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
+    row.forEach((v, x) => {
+      if (v !== 0) {
         ctx.fillStyle = '#0ff';
-        ctx.fillRect(x + offset.x,
-                     y + offset.y,
-                     1, 1);
+        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
       }
     });
   });
@@ -165,38 +172,39 @@ function drawMatrix(matrix, offset) {
 function draw() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawMatrix(arena, {x:0, y:0});
+  drawMatrix(arena, {x:0,y:0});
   drawMatrix(player.matrix, player.pos);
 }
 
-let dropCounter = 0;
-let dropInterval = 700;
+/* ===== Loop ===== */
+
 let lastTime = 0;
+let dropCounter = 0;
+const dropInterval = 700;
 
 function update(time = 0) {
   const delta = time - lastTime;
   lastTime = time;
   dropCounter += delta;
+
   if (dropCounter > dropInterval) {
-    playerDrop();
+    drop();
     dropCounter = 0;
   }
+
   draw();
   requestAnimationFrame(update);
 }
 
+/* Tastatur */
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') player.pos.x--;
-  if (e.key === 'ArrowRight') player.pos.x++;
-  if (e.key === 'ArrowDown') playerDrop();
-  if (e.key === 'ArrowUp') playerRotate();
-  if (collide(arena, player)) {
-    if (e.key === 'ArrowLeft') player.pos.x++;
-    if (e.key === 'ArrowRight') player.pos.x--;
-  }
+  if (e.key === 'ArrowLeft') move(-1);
+  if (e.key === 'ArrowRight') move(1);
+  if (e.key === 'ArrowUp') rotatePlayer();
+  if (e.key === 'ArrowDown') drop();
 });
 
-playerReset();
+resetPlayer();
 update();
 </script>
 
