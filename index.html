@@ -1,13 +1,11 @@
 <!-- TEST 13:10 -->
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Tetris</title>
+<title>Word Tetris</title>
 
 <style>
 body {
@@ -19,7 +17,6 @@ body {
   font-family: system-ui, sans-serif;
 }
 
-/* Alles fix in der Mitte */
 .game {
   position: fixed;
   top: 50%;
@@ -35,7 +32,6 @@ canvas {
   border: 2px solid #444;
 }
 
-/* Spiel-Bar */
 .controls {
   margin-top: 10px;
   display: flex;
@@ -60,7 +56,6 @@ canvas {
 
   <div class="controls">
     <button onclick="move(-1)">◀</button>
-    <button onclick="rotatePlayer()">⟳</button>
     <button onclick="move(1)">▶</button>
     <button onclick="drop()">▼</button>
   </div>
@@ -71,101 +66,43 @@ const canvas = document.getElementById('tetris');
 const ctx = canvas.getContext('2d');
 ctx.scale(20, 20);
 
-/* Farben */
-const colors = [
-  null,
-  '#00f0f0', // I
-  '#0000f0', // J
-  '#f0a000', // L
-  '#f0f000', // O
-  '#00f000', // S
-  '#a000f0', // T
-  '#f00000'  // Z
+/* ===== ENGLISH DICTIONARY ===== */
+const WORDS = [
+  'CAT','DOG','SUN','CAR','HAT','BAT','BOOK','CODE','GAME',
+  'WORD','JAVA','HTML','CSS','PLAY','FUN'
 ];
+const MIN_LEN = 3;
 
-const arena = Array.from({ length: 20 }, () => Array(10).fill(0));
+/* ===== COLORS ===== */
+const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
 
-const pieces = {
-  I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-  J: [[1,0,0],[1,1,1],[0,0,0]],
-  L: [[0,0,1],[1,1,1],[0,0,0]],
-  O: [[1,1],[1,1]],
-  S: [[0,1,1],[1,1,0],[0,0,0]],
-  T: [[0,1,0],[1,1,1],[0,0,0]],
-  Z: [[1,1,0],[0,1,1],[0,0,0]]
-};
+const arena = Array.from({ length: 20 }, () => Array(10).fill(null));
+const highlights = Array.from({ length: 20 }, () => Array(10).fill(null));
 
 const player = {
   pos: { x: 0, y: 0 },
-  matrix: null,
-  color: null
+  letter: ''
 };
 
-/* ===== Logik ===== */
+/* ===== LOGIC ===== */
 
 function collide(arena, player) {
-  const m = player.matrix;
-  const o = player.pos;
-
-  for (let y = 0; y < m.length; y++) {
-    for (let x = 0; x < m[y].length; x++) {
-      if (m[y][x] !== 0) {
-        const ay = y + o.y;
-        const ax = x + o.x;
-
-        if (ay < 0) continue;
-
-        if (
-          ay >= arena.length ||
-          ax < 0 ||
-          ax >= arena[0].length ||
-          arena[ay][ax] !== 0
-        ) return true;
-      }
-    }
-  }
-  return false;
-}
-
-function merge(arena, player) {
-  player.matrix.forEach((row, y) => {
-    row.forEach((v, x) => {
-      if (v !== 0) {
-        arena[y + player.pos.y][x + player.pos.x] =
-          colors.indexOf(player.color);
-      }
-    });
-  });
-}
-
-function rotate(matrix) {
-  return matrix[0].map((_, i) =>
-    matrix.map(row => row[i]).reverse()
+  const { x, y } = player.pos;
+  return (
+    y >= arena.length ||
+    x < 0 ||
+    x >= arena[0].length ||
+    arena[y][x] !== null
   );
 }
 
-/* ===== Steuerung ===== */
+function merge(arena, player) {
+  arena[player.pos.y][player.pos.x] = player.letter;
+}
 
 function move(dir) {
   player.pos.x += dir;
   if (collide(arena, player)) player.pos.x -= dir;
-}
-
-function rotatePlayer() {
-  const old = player.matrix;
-  const oldX = player.pos.x;
-  player.matrix = rotate(player.matrix);
-
-  let offset = 1;
-  while (collide(arena, player)) {
-    player.pos.x += offset;
-    offset = -(offset + (offset > 0 ? 1 : -1));
-    if (Math.abs(offset) > player.matrix[0].length) {
-      player.matrix = old;
-      player.pos.x = oldX;
-      return;
-    }
-  }
 }
 
 function drop() {
@@ -173,67 +110,148 @@ function drop() {
   if (collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
+    checkAndClearWords();
     resetPlayer();
-    sweep();
   }
 }
 
-/* ===== Arena ===== */
+/* ===== WORD DETECTION ===== */
 
-function sweep() {
-  for (let y = arena.length - 1; y >= 0; y--) {
-    if (arena[y].every(v => v !== 0)) {
-      arena.splice(y, 1);
-      arena.unshift(Array(10).fill(0));
+function checkAndClearWords() {
+  clearHighlights();
+  const found = findWords();
+  if (!found.length) return;
+
+  found.forEach(group => {
+    const color = COLORS[Math.random() * COLORS.length | 0];
+    group.forEach(([y, x]) => {
+      highlights[y][x] = color;
+    });
+  });
+
+  setTimeout(() => {
+    found.flat().forEach(([y, x]) => arena[y][x] = null);
+    applyGravity();
+    clearHighlights();
+  }, 300);
+}
+
+function findWords() {
+  const found = [];
+
+  // Horizontal
+  for (let y = 0; y < arena.length; y++) {
+    let word = '';
+    let pos = [];
+    for (let x = 0; x <= arena[0].length; x++) {
+      const cell = arena[y][x];
+      if (cell) {
+        word += cell;
+        pos.push([y, x]);
+      } else {
+        extractWords(word, pos, found);
+        word = '';
+        pos = [];
+      }
+    }
+  }
+
+  // Vertical
+  for (let x = 0; x < arena[0].length; x++) {
+    let word = '';
+    let pos = [];
+    for (let y = 0; y <= arena.length; y++) {
+      const cell = arena[y]?.[x];
+      if (cell) {
+        word += cell;
+        pos.push([y, x]);
+      } else {
+        extractWords(word, pos, found);
+        word = '';
+        pos = [];
+      }
+    }
+  }
+
+  return found;
+}
+
+function extractWords(word, pos, found) {
+  if (word.length < MIN_LEN) return;
+  WORDS.forEach(w => {
+    let i = word.indexOf(w);
+    if (i !== -1) {
+      found.push(pos.slice(i, i + w.length));
+    }
+  });
+}
+
+/* ===== GRAVITY ===== */
+
+function applyGravity() {
+  for (let x = 0; x < arena[0].length; x++) {
+    for (let y = arena.length - 1; y >= 0; y--) {
+      if (arena[y][x] === null) {
+        for (let k = y - 1; k >= 0; k--) {
+          if (arena[k][x] !== null) {
+            arena[y][x] = arena[k][x];
+            arena[k][x] = null;
+            break;
+          }
+        }
+      }
     }
   }
 }
 
+/* ===== PLAYER ===== */
+
+function randomLetter() {
+  return String.fromCharCode(65 + Math.random() * 26 | 0);
+}
+
 function resetPlayer() {
-  const types = 'IJLOSTZ';
-  const type = types[Math.random() * types.length | 0];
-  player.matrix = pieces[type];
-  player.color = colors[types.indexOf(type) + 1];
-  player.pos.y = -1;
-  player.pos.x =
-    (arena[0].length / 2 | 0) -
-    (player.matrix[0].length / 2 | 0);
+  player.letter = randomLetter();
+  player.pos.y = 0;
+  player.pos.x = arena[0].length / 2 | 0;
 
   if (collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
+    arena.forEach(row => row.fill(null));
   }
 }
 
-/* ===== Zeichnen ===== */
+/* ===== DRAW ===== */
+
+function clearHighlights() {
+  highlights.forEach(row => row.fill(null));
+}
 
 function draw() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  ctx.font = '1px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
   arena.forEach((row, y) => {
     row.forEach((v, x) => {
-      if (v !== 0) {
-        ctx.fillStyle = colors[v];
-        ctx.fillRect(x, y, 1, 1);
+      if (v) {
+        ctx.fillStyle = highlights[y][x] || '#fff';
+        ctx.fillText(v, x + 0.5, y + 0.5);
       }
     });
   });
 
-  player.matrix.forEach((row, y) => {
-    row.forEach((v, x) => {
-      if (v !== 0) {
-        ctx.fillStyle = player.color;
-        ctx.fillRect(
-          x + player.pos.x,
-          y + player.pos.y,
-          1, 1
-        );
-      }
-    });
-  });
+  ctx.fillStyle = '#0f0';
+  ctx.fillText(
+    player.letter,
+    player.pos.x + 0.5,
+    player.pos.y + 0.5
+  );
 }
 
-/* ===== Loop ===== */
+/* ===== LOOP ===== */
 
 let lastTime = 0;
 let dropCounter = 0;
@@ -253,11 +271,11 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-/* Tastatur */
+/* ===== INPUT ===== */
+
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') move(-1);
   if (e.key === 'ArrowRight') move(1);
-  if (e.key === 'ArrowUp') rotatePlayer();
   if (e.key === 'ArrowDown') drop();
 });
 
