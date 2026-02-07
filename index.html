@@ -210,7 +210,31 @@ function applyGravity(){
 }
 
 /* ===== PLAYER ===== */
-function randomLetter(){ return String.fromCharCode(65+Math.floor(Math.random()*26)); }
+function randomLetterForTarget() {
+  // Zähle, wie viele Buchstaben vom Zielwort noch fehlen
+  const needed = {};
+  for (const char of targetWord) needed[char] = (needed[char] || 0) + 1;
+
+  // Zähle Buchstaben im aktuellen Grid
+  for (let y = 0; y < arena.length; y++) {
+    for (let x = 0; x < arena[0].length; x++) {
+      const c = arena[y][x];
+      if (c && needed[c]) needed[c]--;
+    }
+  }
+
+  // Liste aller Buchstaben, die noch gebraucht werden
+  const remaining = [];
+  for (const [char, count] of Object.entries(needed)) {
+    for (let i = 0; i < count; i++) remaining.push(char);
+  }
+
+  // Wenn noch Buchstaben benötigt werden, wähle einen davon
+  if (remaining.length) return remaining[Math.floor(Math.random()*remaining.length)];
+
+  // Sonst zufälliger Buchstabe
+  return String.fromCharCode(65+Math.floor(Math.random()*26));
+}
 
 function resetPlayer(){
   player.letter = randomLetter();
