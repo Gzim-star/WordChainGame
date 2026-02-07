@@ -121,6 +121,15 @@ const WORDS = [
 ];
 const MIN_LEN = 10;
 
+function extract(word, pos, found) {
+  if (word.length < MIN_LEN) return;
+  const upperWord = word.toUpperCase();
+  WORDS.forEach(w => {
+    const i = upperWord.indexOf(w);
+    if (i !== -1) found.push(pos.slice(i, i + w.length));
+  });
+}
+
 /* ===== COLORS für Wörter & Player ===== */
 const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
 
