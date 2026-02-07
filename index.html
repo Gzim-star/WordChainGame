@@ -31,7 +31,7 @@ html, body {
 
 .hint {
   color: #fff;
-  font-size: 20px;
+  font-size: 24px;
   margin-bottom: 10px;
   font-family: monospace;
 }
@@ -62,15 +62,14 @@ canvas {
 <body>
 
 <div class="game">
-  <div class="hint">Word Hint: <span id="wordHint"></span></div>
+  <div class="hint"><span id="wordHint"></span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
 
   <div class="controls">
     <button onclick="move(-1)">◀</button>
     <button onclick="move(1)">▶</button>
-    <button onclick="drop()">▼</button>
+    </div>
   </div>
-</div>
 
 <script>
 /* ===== DOUBLE TAP ZOOM KILLER ===== */
