@@ -69,9 +69,9 @@ canvas {
 
   <div class="controls">
     <button onclick="startGame()">Start</button>
+    <button onclick="restartGame()">Restart</button>
     <button onclick="move(-1)">◀</button>
     <button onclick="move(1)">▶</button>
-    <button onclick="restartGame()">Restart</button>
   </div>
 </div>
 
@@ -87,7 +87,7 @@ document.addEventListener('touchend', e => {
 /* ===== CANVAS ===== */
 const canvas = document.getElementById('wordFallCanvas');
 const ctx = canvas.getContext('2d');
-ctx.scale(30, 30);
+ctx.scale(30, 30); // Grid vergrößern
 
 /* ===== DICTIONARY ===== */
 const WORDS = [
@@ -100,6 +100,8 @@ const WORDS = [
   'YELLOWHAZE', 'ZOOLOGISTS'
 ];
 const MIN_LEN = 10;
+
+/* ===== COLORS ===== */
 const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
 
 /* ===== ARENA ===== */
@@ -107,10 +109,9 @@ const arena = Array.from({ length: 20 }, () => Array(10).fill(null));
 const highlights = Array.from({ length: 20 }, () => Array(10).fill(null));
 
 const player = { pos: { x: 0, y: 0 }, letter: '' };
-let targetWord = '';
-let gameRunning = false;
 
-/* ===== TARGET WORD HINT ===== */
+/* ===== TARGET WORD ===== */
+let targetWord = '';
 function newTargetWord() {
   targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
   document.getElementById('wordHint').textContent = targetWord;
@@ -121,16 +122,9 @@ function collide(arena, player) {
   const { x, y } = player.pos;
   return y >= arena.length || x < 0 || x >= arena[0].length || arena[y][x] !== null;
 }
-
 function merge(arena, player) { arena[player.pos.y][player.pos.x] = player.letter; }
-
-function move(dir) { 
-  player.pos.x += dir; 
-  if (collide(arena, player)) player.pos.x -= dir; 
-}
-
+function move(dir) { player.pos.x += dir; if (collide(arena, player)) player.pos.x -= dir; }
 function drop() {
-  if (!gameRunning) return;
   player.pos.y++;
   if (collide(arena, player)) {
     player.pos.y--;
@@ -168,7 +162,6 @@ function checkAndClearWords() {
     clearHighlights();
   }, 300);
 }
-
 function findWords() {
   const found=[];
   for(let y=0;y<arena.length;y++){
@@ -189,7 +182,6 @@ function findWords() {
   }
   return found;
 }
-
 function extract(word,pos,found){
   if(word.length<MIN_LEN) return;
   const upperWord = word.toUpperCase();
@@ -210,12 +202,11 @@ function applyGravity(){
 }
 
 /* ===== PLAYER ===== */
+// kontrollierter Buchstabenfall, damit Zielwort immer machbar ist
 function randomLetterForTarget() {
-  // Zähle, wie viele Buchstaben vom Zielwort noch fehlen
   const needed = {};
   for (const char of targetWord) needed[char] = (needed[char] || 0) + 1;
 
-  // Zähle Buchstaben im aktuellen Grid
   for (let y = 0; y < arena.length; y++) {
     for (let x = 0; x < arena[0].length; x++) {
       const c = arena[y][x];
@@ -223,21 +214,17 @@ function randomLetterForTarget() {
     }
   }
 
-  // Liste aller Buchstaben, die noch gebraucht werden
   const remaining = [];
   for (const [char, count] of Object.entries(needed)) {
     for (let i = 0; i < count; i++) remaining.push(char);
   }
 
-  // Wenn noch Buchstaben benötigt werden, wähle einen davon
   if (remaining.length) return remaining[Math.floor(Math.random()*remaining.length)];
-
-  // Sonst zufälliger Buchstabe
   return String.fromCharCode(65+Math.floor(Math.random()*26));
 }
 
 function resetPlayer(){
-  player.letter = randomLetter();
+  player.letter = randomLetterForTarget();
   player.pos.y = 0;
   player.pos.x = Math.floor(arena[0].length/2);
   if(collide(arena,player)) arena.forEach(row=>row.fill(null));
@@ -245,68 +232,49 @@ function resetPlayer(){
 
 /* ===== DRAW ===== */
 function clearHighlights(){ highlights.forEach(row=>row.fill(null)); }
-
 function draw(){
-  ctx.fillStyle='#000'; 
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.font='1px monospace'; 
-  ctx.textAlign='center'; 
-  ctx.textBaseline='middle';
-
-  arena.forEach((row,y)=>{
-    row.forEach((v,x)=>{
-      if(v){ 
-        ctx.fillStyle = highlights[y][x]||COLORS[(x+y)%COLORS.length]; 
-        ctx.fillText(v,x+0.5,y+0.5); 
-      }
-    });
-  });
-
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.font='1px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  arena.forEach((row,y)=>{ row.forEach((v,x)=>{ if(v){ ctx.fillStyle = highlights[y][x]||COLORS[(x+y)%COLORS.length]; ctx.fillText(v,x+0.5,y+0.5); } }); });
   ctx.fillStyle = COLORS[(player.pos.x+player.pos.y)%COLORS.length];
   ctx.fillText(player.letter,player.pos.x+0.5,player.pos.y+0.5);
 }
 
 /* ===== LOOP ===== */
-let lastTime=0, dropCounter=0, dropInterval=700;
-
+let lastTime=0,dropCounter=0,dropInterval=700;
+let gameRunning = false;
 function update(time=0){
+  if(!gameRunning) return;
   const delta = time - lastTime;
   lastTime=time;
-  if(gameRunning){
-    dropCounter+=delta;
-    if(dropCounter>dropInterval){ drop(); dropCounter=0; }
-  }
+  dropCounter+=delta;
+  if(dropCounter>dropInterval){ drop(); dropCounter=0; }
   draw();
   requestAnimationFrame(update);
 }
 
 /* ===== INPUT ===== */
 document.addEventListener('keydown',e=>{
+  if(!gameRunning) return;
   if(e.key==='ArrowLeft') move(-1);
   if(e.key==='ArrowRight') move(1);
   if(e.key==='ArrowDown') drop();
 });
 
-/* ===== BUTTON FUNCTIONS ===== */
+/* ===== START / RESTART ===== */
 function startGame(){
-  if(!gameRunning){
-    gameRunning = true;
-    resetPlayer();
-    newTargetWord();
-  }
+  gameRunning = true;
+  newTargetWord();
+  resetPlayer();
+  update();
 }
 
 function restartGame(){
-  arena.forEach(row => row.fill(null));
+  arena.forEach(row=>row.fill(null));
   clearHighlights();
-  resetPlayer();
-  newTargetWord();
-  dropCounter = 0;
-  gameRunning = true;
+  startGame();
 }
 
-/* ===== INIT ===== */
-update(); // Loop startet, aber Spiel fällt erst nach Start
 </script>
 
 </body>
