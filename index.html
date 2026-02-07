@@ -101,7 +101,8 @@ const WORDS = [
 ];
 const MIN_LEN = 10;
 const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
-
+const MAX_PER_LETTER = 5;
+const letterCount = {};
 /* ===== ARENA ===== */
 const arena = Array.from({ length: 20 }, () => Array(10).fill(null));
 const highlights = Array.from({ length: 20 }, () => Array(10).fill(null));
@@ -196,6 +197,17 @@ function extract(word,pos,found){
   WORDS.forEach(w=>{const i=upperWord.indexOf(w); if(i!==-1) found.push(pos.slice(i,i+w.length)); });
 }
 
+function recountLetters() {
+  for (let i = 65; i <= 90; i++) {
+    letterCount[String.fromCharCode(i)] = 0;
+  }
+
+  arena.forEach(row => {
+    row.forEach(cell => {
+      if (cell) letterCount[cell]++;
+    });
+  });
+}
 /* ===== GRAVITY ===== */
 function applyGravity(){
   for(let x=0;x<arena[0].length;x++){
@@ -210,7 +222,24 @@ function applyGravity(){
 }
 
 /* ===== PLAYER ===== */
-function randomLetter(){ return String.fromCharCode(65+Math.floor(Math.random()*26)); }
+function randomLetter(){
+  recountLetters();
+
+  const allowed = [];
+  for (let i = 65; i <= 90; i++) {
+    const l = String.fromCharCode(i);
+    if (letterCount[l] < MAX_PER_LETTER) {
+      allowed.push(l);
+    }
+  }
+
+  // Fallback (sollte fast nie passieren)
+  if (allowed.length === 0) {
+    return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  }
+
+  return allowed[Math.floor(Math.random() * allowed.length)];
+}
 
 function resetPlayer(){
   player.letter = randomLetter();
