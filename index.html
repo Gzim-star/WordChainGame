@@ -68,10 +68,11 @@ canvas {
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
 
   <div class="controls">
-    <button onclick="startGame()">Start</button>
-    <button onclick="move(-1)">◀-</button>
-    <button onclick="move(1)">-▶</button>
-    <button onclick="restartGame()">Restart</button>
+  <button onclick="startGame()">Start</button>
+  <button onclick="move(-1)">◀</button>
+  <button onclick="move(1)">▶</button>
+  <button onclick="dropFast()">▼</button> <!-- Neuer Button -->
+  <button onclick="restartGame()">Restart</button>
   </div>
 </div>
 
@@ -324,6 +325,17 @@ function restartGame(){
   newTargetWord();
   dropCounter = 0;
   gameRunning = true;
+}
+
+function dropFast() {
+  if (!gameRunning) return;
+  while (!collide(arena, player)) {
+    player.pos.y++;
+  }
+  player.pos.y--; // letzte Position zurück
+  merge(arena, player);
+  checkAndClearWords();
+  resetPlayer();
 }
 
 /* ===== INIT ===== */
