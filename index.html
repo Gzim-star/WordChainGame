@@ -101,8 +101,6 @@ const WORDS = [
 ];
 const MIN_LEN = 10;
 const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
-const MAX_PER_LETTER = 4;
-const letterCount = {};
 
 /* ===== ARENA ===== */
 const arena = Array.from({ length: 20 }, () => Array(10).fill(null));
@@ -138,6 +136,7 @@ function drop() {
     player.pos.y--;
     merge(arena, player);
     checkAndClearWords();
+    clearDiagonalSixByColor(); // 👈 HIER GENAU
     resetPlayer();
   }
 }
@@ -197,16 +196,50 @@ function extract(word,pos,found){
   const upperWord = word.toUpperCase();
   WORDS.forEach(w=>{const i=upperWord.indexOf(w); if(i!==-1) found.push(pos.slice(i,i+w.length)); });
 }
-function recountLetters() {
-  for (let i = 65; i <= 90; i++) {
-    letterCount[String.fromCharCode(i)] = 0;
+function clearDiagonalSixByColor() {
+  const toClear = [];
+
+  for (let y = arena.length - 1; y >= 0; y--) {
+    for (let x = 0; x < arena[0].length; x++) {
+
+      if (!arena[y][x]) continue;
+
+      const baseColor = COLORS[(x + y) % COLORS.length];
+      const chain = [[y, x]];
+
+      let ny = y - 1;
+      let nx = x + 1;
+
+      while (
+        ny >= 0 &&
+        nx < arena[0].length &&
+        arena[ny][nx] &&
+        COLORS[(nx + ny) % COLORS.length] === baseColor
+      ) {
+        chain.push([ny, nx]);
+        ny--;
+        nx++;
+      }
+
+      if (chain.length >= 6) {
+        chain.forEach(p => toClear.push(p));
+      }
+    }
   }
 
-  arena.forEach(row => {
-    row.forEach(cell => {
-      if (cell) letterCount[cell]++;
-    });
+  if (!toClear.length) return;
+
+  toClear.forEach(([y, x]) => {
+    highlights[y][x] = '#ff3333';
   });
+
+  setTimeout(() => {
+    toClear.forEach(([y, x]) => {
+      arena[y][x] = null;
+    });
+    applyGravity();
+    clearHighlights();
+  }, 250);
 }
 /* ===== GRAVITY ===== */
 function applyGravity(){
@@ -222,24 +255,7 @@ function applyGravity(){
 }
 
 /* ===== PLAYER ===== */
-function randomLetter(){
-  recountLetters();
-
-  const allowed = [];
-  for (let i = 65; i <= 90; i++) {
-    const l = String.fromCharCode(i);
-    if (letterCount[l] < MAX_PER_LETTER) {
-      allowed.push(l);
-    }
-  }
-
-  // Fallback (sollte fast nie passieren)
-  if (allowed.length === 0) {
-    return String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  }
-
-  return allowed[Math.floor(Math.random() * allowed.length)];
-}
+function randomLetter(){ return String.fromCharCode(65+Math.floor(Math.random()*26)); }
 
 function resetPlayer(){
   player.letter = randomLetter();
