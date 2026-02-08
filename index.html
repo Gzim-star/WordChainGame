@@ -1,1 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<title>Word Fall</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  overflow: hidden;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  font-family: system-ui, sans-serif;
+}
+
+.game {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.hint {
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+
+canvas {
+  background: #000;
+  border: 3px solid #444;
+  touch-action: none;
+}
+
+.controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.controls button {
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 12px 16px;
+  font-size: 18px;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+  <div class="hint"><span id="wordHint"></span></div>
+  <canvas id="wordFallCanvas" width="300" height="600"></canvas>
+
+  <div class="controls">
+    <button onclick="startGame()">Start</button>
+    <button onclick="move(-1)">◀-</button>
+    <button onclick="move(1)">-▶</button>
+    <button onclick="restartGame()">Restart</button>
+  </div>
+</div>
+
+<script>
+/* ===== DOUBLE TAP ZOOM KILLER ===== */
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+
+/* ===== CANVAS ===== */
+const canvas = document.getElementById('wordFallCanvas');
+const ctx = canvas.getContext('2d');
+ctx.scale(30, 30);
+
+/* ===== DICTIONARY ===== */
+const WORDS = [
+  'ABOMINABLE', 'BIRDCATCHER', 'CROSSBREED', 'DISASTROUS',
+  'EVERYTHING', 'FASCINATOR', 'GRANDMOTHER', 'HEARTBEATS',
+  'IMMEDIATES', 'JOURNALISM', 'KNIGHTHOOD', 'LANDSCAPER',
+  'MASTERMIND', 'NIGHTSTAND', 'OPERATIONS', 'POPULATION',
+  'QUARTERBACK', 'RENDEZVOUS', 'SCRATCHING', 'TRANSPARENT',
+  'UNDERTAKER', 'VOLUNTEERS', 'WATERMELON', 'XENOPHOBIC',
+  'YELLOWHAZE', 'ZOOLOGISTS'
+];
+const MIN_LEN = 10;
+const COLORS = ['#00ffcc', '#ffcc00', '#ff6699', '#66ff66', '#66ccff'];
+const MAX_PER_LETTER = 4;
+const letterCount = {};
+
+/* ===== ARENA ===== */
+const arena = Array.from({ length: 20 }, () => Array(10).fill(null));
+const highlights = Array.from({ length: 20 }, () => Array(10).fill(null));
+
+const player = { pos: { x: 0, y: 0 }, letter: '' };
+let targetWord = '';
+let gameRunning = false;
+
+/* ===== TARGET WORD HINT ===== */
+function newTargetWord() {
+  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  document.getElementById('wordHint').textContent = targetWord;
+}
+
+/* ===== GAME LOGIC ===== */
+function collide(arena, player) {
+  const { x, y } = player.pos;
+  return y >= arena.length || x < 0 || x >= arena[0].length || arena[y][x] !== null;
+}
+
+function merge(arena, player) { arena[player.pos.y][player.pos.x] = player.letter; }
+
+function move(dir) { 
+  player.pos.x += dir; 
+  if (collide(arena, player)) player.pos.x -= dir; 
+}
+
+function drop() {
+  if (!gameRunning) return;
+  player.pos.y++;
+  if (collide(arena, player)) {
+    player.pos.y--;
+    merge(arena, player);
+    checkAndClearWords();
+    resetPlayer();
+  }
+}
+
+/* ===== WORD DETECTION ===== */
+function checkAndClearWords() {
+  clearHighlights();
+  const found = findWords();
+  if (!found.length) return;
+
+  let targetFound = false;
+  found.forEach(group => {
+    const letters = group.map(([y,x]) => arena[y][x]).join('');
+    if (letters.toUpperCase() === targetWord) targetFound = true;
+
+    const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+    group.forEach(([y,x]) => highlights[y][x]=color);
+  });
+
+  setTimeout(() => {
+    if (targetFound) {
+      arena.forEach(row => row.fill(null));
+      newTargetWord();
+      resetPlayer();
+      clearHighlights();
+      return;
+    }
+    found.flat().forEach(([y,x])=>arena[y][x]=null);
+    applyGravity();
+    clearHighlights();
+  }, 300);
+}
+
+function findWords() {
+  const found=[];
+  for(let y=0;y<arena.length;y++){
+    let word='',pos=[];
+    for(let x=0;x<=arena[0].length;x++){
+      const c=arena[y][x];
+      if(c){ word+=c; pos.push([y,x]); }
+      else{ extract(word,pos,found); word=''; pos=[]; }
+    }
+  }
+  for(let x=0;x<arena[0].length;x++){
+    let word='',pos=[];
+    for(let y=0;y<=arena.length;y++){
+      const c=arena[y]?.[x];
+      if(c){ word+=c; pos.push([y,x]); }
+      else{ extract(word,pos,found); word=''; pos=[]; }
+    }
+  }
+  return found;
+}
+
+function extract(word,pos,found){
+  if(word.length<MIN_LEN) return;
+  const upperWord = word.toUpperCase();
+  WORDS.forEach(w=>{const i=upperWord.indexOf(w); if(i!==-1) found.push(pos.slice(i,i+w.length)); });
+}
+function recountLetters() {
+  for (let i = 65; i <= 90; i++) {
+    letterCount[String.fromCharCode(i)] = 0;
+  }
+
+  arena.forEach(row => {
+    row.forEach(cell => {
+      if (cell) letterCount[cell]++;
+    });
+  });
+}
+/* ===== GRAVITY ===== */
+function applyGravity(){
+  for(let x=0;x<arena[0].length;x++){
+    for(let y=arena.length-1;y>=0;y--){
+      if(arena[y][x]===null){
+        for(let k=y-1;k>=0;k--){
+          if(arena[k][x]!==null){ arena[y][x]=arena[k][x]; arena[k][x]=null; break; }
+        }
+      }
+    }
+  }
+}
+
+/* ===== PLAYER ===== */
+function randomLetter(){
+  recountLetters();
+
+  const allowed = [];
+  for (let i = 65; i <= 90; i++) {
+    const l = String.fromCharCode(i);
+    if (letterCount[l] < MAX_PER_LETTER) {
+      allowed.push(l);
+    }
+  }
+
+  // Fallback (sollte fast nie passieren)
+  if (allowed.length === 0) {
+    return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  }
+
+  return allowed[Math.floor(Math.random() * allowed.length)];
+}
+
+function resetPlayer(){
+  player.letter = randomLetter();
+  player.pos.y = 0;
+  player.pos.x = Math.floor(arena[0].length/2);
+  if(collide(arena,player)) arena.forEach(row=>row.fill(null));
+}
+
+/* ===== DRAW ===== */
+function clearHighlights(){ highlights.forEach(row=>row.fill(null)); }
+
+function draw(){
+  ctx.fillStyle='#000'; 
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.font='1px monospace'; 
+  ctx.textAlign='center'; 
+  ctx.textBaseline='middle';
+
+  arena.forEach((row,y)=>{
+    row.forEach((v,x)=>{
+      if(v){ 
+        ctx.fillStyle = highlights[y][x]||COLORS[(x+y)%COLORS.length]; 
+        ctx.fillText(v,x+0.5,y+0.5); 
+      }
+    });
+  });
+
+  ctx.fillStyle = COLORS[(player.pos.x+player.pos.y)%COLORS.length];
+  ctx.fillText(player.letter,player.pos.x+0.5,player.pos.y+0.5);
+}
+
+/* ===== LOOP ===== */
+let lastTime=0, dropCounter=0, dropInterval=700;
+
+function update(time=0){
+  const delta = time - lastTime;
+  lastTime=time;
+  if(gameRunning){
+    dropCounter+=delta;
+    if(dropCounter>dropInterval){ drop(); dropCounter=0; }
+  }
+  draw();
+  requestAnimationFrame(update);
+}
+
+/* ===== INPUT ===== */
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') move(-1);
+  if(e.key==='ArrowRight') move(1);
+  if(e.key==='ArrowDown') drop();
+});
+
+/* ===== BUTTON FUNCTIONS ===== */
+function startGame(){
+  if(!gameRunning){
+    gameRunning = true;
+    resetPlayer();
+    newTargetWord();
+  }
+}
+
+function restartGame(){
+  arena.forEach(row => row.fill(null));
+  clearHighlights();
+  resetPlayer();
+  newTargetWord();
+  dropCounter = 0;
+  gameRunning = true;
+}
+
+/* ===== INIT ===== */
+update(); // Loop startet, aber Spiel fällt erst nach Start
+</script>
+
+</body>
+</html>
