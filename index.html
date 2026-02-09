@@ -279,7 +279,7 @@ function resetPlayer(){
 function clearHighlights(){ highlights.forEach(row=>row.fill(null)); }
 
 function draw(){
-  ctx.fillStyle='#000'; 
+  ctx.fillStyle='#ffffff'; 
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.font='1px monospace'; 
   ctx.textAlign='center'; 
@@ -292,7 +292,7 @@ function draw(){
 // Glasfläche
 ctx.save();
 ctx.globalAlpha = 0.22;
-ctx.fillStyle = '#ffffff';
+ctx.fillStyle = '';
 ctx.fillRect(frameX + 0.05, frameY - 0.25, 0.9, frameH - 0.2);
 ctx.restore();
 
@@ -310,7 +310,7 @@ ctx.restore();
 
 // leichte Schattenkante rechts
 ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-ctx.lineWidth = 0.04;
+ctx.lineWidth = 0.05;
 ctx.beginPath();
 ctx.moveTo(frameX + 0.95, frameY - 0.25);
 ctx.lineTo(frameX + 0.95, frameY + frameH - 0.45);
