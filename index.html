@@ -57,11 +57,37 @@ canvas {
   font-size: 18px;
   border-radius: 6px;
 }
+.canvas-wrap {
+  position: relative;
+}
+
+.glass-frame {
+  position: absolute;
+  top: 25%;              /* frameY */
+  right: 0;
+  width: 10%;            /* 1 Spalte */
+  height: 50%;           /* frameH */
+
+  border-radius: 6px;
+
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  border-left: 1px solid rgba(255,255,255,0.6);
+  border-right: 1px solid rgba(0,0,0,0.4);
+  pointer-events: none; /* wichtig fürs Game */
+}
 </style>
 </head>
 
 <body>
+<div class="canvas-wrap">
 
+
+  <!-- 🧊 GLAS-RAHMEN -->
+  <div class="glass-frame"></div>
+</div>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
