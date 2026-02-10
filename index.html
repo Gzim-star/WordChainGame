@@ -285,47 +285,58 @@ function draw(){
   ctx.textBaseline='middle';
 
   // 🔲 GRAUER RAHMEN
-// 🧊 GLAS-RAHMEN – NUR KANTEN (9. Spalte)
+// 🧊 GLAS-RAHMEN – sichtbar als Glas
 const frameX = 8;
 const frameY = 5;
 const frameH = 10;
 
 ctx.save();
 
-// äußere helle Kante
-ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+// 1️⃣ hauchdünne Glasfläche (entscheidend!)
+ctx.globalAlpha = 0.03;
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(
+  frameX + 0.05,
+  frameY - 0.25,
+  0.9,
+  frameH - 0.1
+);
+ctx.globalAlpha = 1;
+
+// 2️⃣ Lichtkante außen
+ctx.strokeStyle = 'rgba(255,255,255,0.7)';
 ctx.lineWidth = 0.06;
 ctx.strokeRect(
-  frameX + 0.04,
+  frameX + 0.03,
   frameY - 0.28,
-  0.92,
-  frameH - 0.04
+  0.94,
+  frameH
 );
 
-// innere dunkle Kante
-ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-ctx.lineWidth = 0.04;
+// 3️⃣ Brechung innen (zweite Linie)
+ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+ctx.lineWidth = 0.03;
 ctx.strokeRect(
   frameX + 0.08,
-  frameY - 0.24,
+  frameY - 0.23,
   0.84,
-  frameH - 0.12
+  frameH - 0.1
 );
 
-// Glanzkante links
-ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+// 4️⃣ Schattenkante rechts
+ctx.strokeStyle = 'rgba(0,0,0,0.45)';
 ctx.lineWidth = 0.03;
 ctx.beginPath();
-ctx.moveTo(frameX + 0.08, frameY);
-ctx.lineTo(frameX + 0.08, frameY + frameH - 0.3);
+ctx.moveTo(frameX + 0.97, frameY - 0.25);
+ctx.lineTo(frameX + 0.97, frameY + frameH - 0.35);
 ctx.stroke();
 
-// Schattenkante rechts
-ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-ctx.lineWidth = 0.03;
+// 5️⃣ Reflex links (wichtig!)
+ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+ctx.lineWidth = 0.02;
 ctx.beginPath();
-ctx.moveTo(frameX + 0.96, frameY);
-ctx.lineTo(frameX + 0.96, frameY + frameH - 0.3);
+ctx.moveTo(frameX + 0.09, frameY);
+ctx.lineTo(frameX + 0.09, frameY + frameH - 0.4);
 ctx.stroke();
 
 ctx.restore();
