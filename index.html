@@ -57,11 +57,58 @@ canvas {
   font-size: 18px;
   border-radius: 6px;
 }
+.start-screen {
+  position: fixed;
+  inset: 0;
+  background: url("att.gxrvxzugbKL3GePFIV5g1kWCgTrO-Rqcp7XCj92CmJE.jpeg") center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Dunkler Overlay damit Text lesbar bleibt */
+.start-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+.title {
+  position: relative;
+  color: white;
+  font-size: 48px;
+  letter-spacing: 3px;
+}
+
+.subtitle {
+  position: relative;
+  color: #ddd;
+  margin-top: 10px;
+}
+
+.enter-btn {
+  position: relative;
+  margin-top: 30px;
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  backdrop-filter: blur(6px);
+}
 </style>
 </head>
 
 <body>
-
+<div class="start-screen">
+  <h1 class="title">WORD FALL</h1>
+  <p class="subtitle">Find the hidden power</p>
+  <button class="enter-btn">Enter</button>
+</div>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
