@@ -57,11 +57,60 @@ canvas {
   font-size: 18px;
   border-radius: 6px;
 }
+.flow-screen {
+  position: fixed;
+  inset: 0;
+  background: #111; /* dunkler Hintergrund */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-family: 'Press Start 2P', monospace;
+  z-index: 9999;
+}
+
+.flow-screen h1 {
+  font-size: 48px;
+  letter-spacing: 4px;
+  margin: 0;
+  text-shadow: 0 0 8px rgba(255,255,255,0.3);
+}
+
+.flow-screen p {
+  margin-top: 10px;
+  opacity: 0.8;
+  font-size: 18px;
+}
+
+.flow-screen button {
+  margin-top: 25px;
+  padding: 14px 36px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(6px);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flow-screen button:hover {
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 0 12px rgba(255,255,255,0.3);
+}
+
 </style>
 </head>
 
 <body>
-
+<!-- ===== FLOW SCREEN ===== -->
+<div class="flow-screen" id="flowScreen">
+  <h1>WORD FALL</h1>
+  <p>Logic. Focus. Flow.</p>
+  <button onclick="startGameScreen()">ENTER</button>
+</div>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
@@ -76,6 +125,9 @@ canvas {
 </div>
 
 <script>
+function startGameScreen() {
+  const screen = document.getElementById('flowScreen');
+  screen.style.display = 'none'; // Flow-Screen ausblenden
 /* ===== DOUBLE TAP ZOOM KILLER ===== */
 let lastTouchEnd = 0;
 document.addEventListener('touchend', e => {
