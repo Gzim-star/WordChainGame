@@ -57,65 +57,11 @@ canvas {
   font-size: 18px;
   border-radius: 6px;
 }
-.flow-screen {
-  position: fixed;
-  inset: 0;
-}
-
-.flow-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Text + Button über dem Bild */
-.overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  text-align: center;
-}
-
-.overlay h1 {
-  font-size: 48px;
-  letter-spacing: 4px;
-}
-
-.overlay p {
-  margin-top: 10px;
-  opacity: 0.8;
-}
-
-.overlay button {
-  margin-top: 25px;
-  padding: 12px 30px;
-  font-size: 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.6);
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(6px);
-  color: white;
-}
 </style>
 </head>
 
 <body>
-<div class="flow-screen">
-  
-  <img src="att.gxrvxzugbKL3GePFIV5g1kWCgTrO-Rqcp7XCj92CmJE.jpeg" class="flow-image">
 
-  <div class="overlay">
-    <h1>WORD FALL</h1>
-    <p>Logic. Focus. Flow.</p>
-    <button onclick="startGameScreen()">ENTER</button>
-  </div>
-
-</div>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
@@ -343,7 +289,7 @@ function draw(){
   const frameY = 5;
   const frameH = 10;
   ctx.fillStyle = '#808080';
-  ctx.fillRect(frameX + 0.05, frameY - 0.27, 0.9, frameH - 0.2);
+  ctx.fillRect(frameX + 0.05, frameY - 0.3, 0.9, frameH - 0.2);
 
   arena.forEach((row,y)=>{
     row.forEach((v,x)=>{
