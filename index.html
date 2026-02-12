@@ -45,10 +45,7 @@ canvas {
 }
 
 #introCanvas {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 9999;
+  border: none !important;
   display: block;
 }
 
@@ -379,7 +376,7 @@ function introLoop() {
     }
   }
 
-  introCtx.font = "120px 'Press Start 2P'";
+  introCtx.font = "50px 'Press Start 2P'";
   introCtx.fillText("W", introCanvas.width / 2, letterY);
 
   // Fade in full title
