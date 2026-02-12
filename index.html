@@ -43,11 +43,6 @@ canvas {
   border: 3px solid #444;
   touch-action: none;
 }
-#introCanvas {
-  border: none;
-  background: #000;
-  display: block;
-}
 .controls {
   margin-top: 10px;
   display: flex;
@@ -66,13 +61,7 @@ canvas {
 </head>
 
 <body>
-<canvas id="introCanvas" 
-style="
-position:fixed;
-inset:0;
-background:#000;
-z-index:9999;
-"></canvas>
+
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
@@ -343,79 +332,7 @@ function dropFast(){ if(!gameRunning) return; while(!collide(arena, player)){ pl
 
 /* ===== INIT ===== */
 update();
-
-
-
-// ===== INTRO ANIMATION =====
-const introCanvas = document.getElementById("introCanvas");
-const ctxIntro = introCanvas.getContext("2d");
-
-introCanvas.width = window.innerWidth;
-introCanvas.height = window.innerHeight;
-
-let ballX = introCanvas.width + 50;
-let ballY = introCanvas.height / 2;
-let velocityY = 0;
-let gravity = 0.6;
-let bouncePower = -11;
-let ground = introCanvas.height / 2 + 80;
-
-let phase = 1;
-let glowAlpha = 0;
-
-function introLoop() {
-  ctxIntro.clearRect(0, 0, introCanvas.width, introCanvas.height);
-
-  if (phase === 1) {
-    ballX -= 6;
-    velocityY += gravity;
-    ballY += velocityY;
-
-    if (ballY > ground) {
-      ballY = ground;
-      velocityY = bouncePower;
-
-      if (ballX < introCanvas.width / 2) {
-        phase = 2;
-      }
-    }
-
-    ctxIntro.beginPath();
-    ctxIntro.arc(ballX, ballY, 10, 0, Math.PI * 2);
-    ctxIntro.fillStyle = "white";
-    ctxIntro.fill();
-  }
-
-  if (phase === 2) {
-    glowAlpha += 0.02;
-
-    ctxIntro.globalAlpha = glowAlpha;
-    ctxIntro.fillStyle = "white";
-    ctxIntro.font = "60px 'Press Start 2P'";
-    ctxIntro.textAlign = "center";
-    ctxIntro.shadowBlur = 25;
-    ctxIntro.shadowColor = "white";
-
-    ctxIntro.fillText("ABC...", introCanvas.width / 2, introCanvas.height / 2);
-    
-    ctxIntro.font = "20px 'Press Start 2P'";
-    ctxIntro.fillText("LOGIC  FOCUS  FLOW", introCanvas.width / 2, introCanvas.height / 2 + 70);
-
-    ctxIntro.globalAlpha = 1;
-
-    if (glowAlpha >= 1) {
-      setTimeout(() => {
-        introCanvas.style.display = "none";
-      }, 1200);
-    }
-  }
-
-  requestAnimationFrame(introLoop);
-}
-
-introLoop();
 </script>
 
 </body>
 </html>
-
