@@ -43,6 +43,65 @@ canvas {
   border: 3px solid #444;
   touch-action: none;
 }
+
+#introScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+.title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 48px;
+  color: white;
+  display: flex;
+  gap: 6px;
+}
+
+.title span {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: reveal 0.6s ease forwards;
+}
+
+.title span:nth-child(1) { animation-delay: 0.1s; }
+.title span:nth-child(2) { animation-delay: 0.2s; }
+.title span:nth-child(3) { animation-delay: 0.3s; }
+.title span:nth-child(4) { animation-delay: 0.4s; }
+.title span:nth-child(6) { animation-delay: 0.6s; }
+.title span:nth-child(7) { animation-delay: 0.7s; }
+.title span:nth-child(8) { animation-delay: 0.8s; }
+.title span:nth-child(9) { animation-delay: 0.9s; }
+
+.subtitle {
+  margin-top: 25px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  opacity: 0;
+  animation: fadeSub 1s ease forwards;
+  animation-delay: 1.2s;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSub {
+  to {
+    opacity: 1;
+  }
+}  
+
 .controls {
   margin-top: 10px;
   display: flex;
@@ -61,7 +120,14 @@ canvas {
 </head>
 
 <body>
-
+<div id="introScreen">
+  <div class="title">
+    <span>W</span><span>O</span><span>R</span><span>D</span>
+    <span class="space"></span>
+    <span>F</span><span>A</span><span>L</span><span>L</span>
+  </div>
+  <div class="subtitle">Logic. Focus. Flow.</div>
+</div>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
@@ -332,6 +398,14 @@ function dropFast(){ if(!gameRunning) return; while(!collide(arena, player)){ pl
 
 /* ===== INIT ===== */
 update();
+// Premium Intro Fade Out
+setTimeout(() => {
+  const intro = document.getElementById("introScreen");
+  intro.style.opacity = "0";
+  setTimeout(() => {
+    intro.style.display = "none";
+  }, 800);
+}, 2500);
 </script>
 
 </body>
