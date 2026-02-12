@@ -43,6 +43,15 @@ canvas {
   border: 3px solid #444;
   touch-action: none;
 }
+
+#introCanvas {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: block;
+}
+
 .controls {
   margin-top: 10px;
   display: flex;
@@ -61,7 +70,7 @@ canvas {
 </head>
 
 <body>
-
+<canvas id="introCanvas"></canvas>
 <div class="game">
   <div class="hint"><span id="wordHint">Hint</span></div>
   <canvas id="wordFallCanvas" width="300" height="600"></canvas>
@@ -332,6 +341,66 @@ function dropFast(){ if(!gameRunning) return; while(!collide(arena, player)){ pl
 
 /* ===== INIT ===== */
 update();
+// ===== FALLING LETTER INTRO =====
+
+const introCanvas = document.getElementById("introCanvas");
+const introCtx = introCanvas.getContext("2d");
+
+function resizeIntro() {
+  introCanvas.width = window.innerWidth;
+  introCanvas.height = window.innerHeight;
+}
+resizeIntro();
+window.addEventListener("resize", resizeIntro);
+
+let letterY = -100;
+let velocity = 0;
+let gravity = 0.8;
+let stopped = false;
+let showTitle = false;
+let titleAlpha = 0;
+
+function introLoop() {
+  introCtx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+
+  introCtx.fillStyle = "white";
+  introCtx.textAlign = "center";
+  introCtx.textBaseline = "middle";
+
+  // Falling Letter
+  if (!stopped) {
+    velocity += gravity;
+    letterY += velocity;
+
+    if (letterY >= introCanvas.height / 2) {
+      letterY = introCanvas.height / 2;
+      stopped = true;
+      showTitle = true;
+    }
+  }
+
+  introCtx.font = "120px 'Press Start 2P'";
+  introCtx.fillText("W", introCanvas.width / 2, letterY);
+
+  // Fade in full title
+  if (showTitle) {
+    titleAlpha += 0.02;
+    introCtx.globalAlpha = titleAlpha;
+    introCtx.font = "50px 'Press Start 2P'";
+    introCtx.fillText("WORD FALL", introCanvas.width / 2, introCanvas.height / 2 + 100);
+    introCtx.globalAlpha = 1;
+
+    if (titleAlpha >= 1) {
+      setTimeout(() => {
+        introCanvas.style.display = "none";
+      }, 800);
+    }
+  }
+
+  requestAnimationFrame(introLoop);
+}
+
+introLoop();
 </script>
 
 </body>
