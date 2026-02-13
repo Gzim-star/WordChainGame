@@ -216,6 +216,25 @@ function playSuccessSound() {
   oscillator.stop(audioCtx.currentTime + 0.2);
 }
 
+function playFailSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.3);
+
+  gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.35);
+}
+
 function playChainClearSound() {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -321,7 +340,9 @@ function checkAndClearWords() {
       clearHighlights();
       return;
     }
-
+    if (!targetFound && found.length) {
+        playFailSound();
+    }
     found.flat().forEach(([y,x]) => arena[y][x] = null);
     applyGravity();
     clearHighlights();
