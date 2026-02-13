@@ -209,12 +209,13 @@ function newTargetWord() {
 }
 // 🔀 Rahmen zufällig platzieren
 function randomizeFrame() {
+
   frameX = Math.floor(Math.random() * arena[0].length);
 
-  // arena.length = 20
-  // frameH = 10
-  // maximaler Startpunkt = 20 - 10
-  frameY = Math.floor(Math.random() * (arena.length - frameH));
+  const minY = 5;  // darf nicht ganz oben starten
+  const maxY = arena.length - frameH; // darf nicht unten raus
+
+  frameY = Math.floor(Math.random() * (maxY - minY)) + minY;
 }
 
 
